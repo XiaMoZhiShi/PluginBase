@@ -3,8 +3,6 @@ package xiamomc.pluginbase;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
-import xiamomc.morph.commands.MorphCommandHelper;
-import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.Managers.DependencyManager;
 
 import java.util.ArrayList;

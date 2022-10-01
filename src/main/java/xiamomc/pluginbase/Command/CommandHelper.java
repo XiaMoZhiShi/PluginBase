@@ -1,7 +1,8 @@
 package xiamomc.pluginbase.Command;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.Bukkit;
-import xiamomc.morph.MorphPlugin;
+import org.bukkit.command.CommandSender;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.PluginObject;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
@@ -44,5 +45,20 @@ public abstract class CommandHelper<P extends XiaMoJavaPlugin> extends PluginObj
         }
         else
             return false;
+    }
+
+    protected List<String> onTabComplete(String[] buffer, CommandSender source)
+    {
+        var baseName = buffer[0];
+
+        buffer = ArrayUtils.remove(buffer, 0);
+
+        for (var c : getCommands())
+        {
+            if (c.getCommandName().equals(baseName))
+                return c.onTabComplete(baseName, buffer, source);
+        }
+
+        return List.of("");
     }
 }
