@@ -1,0 +1,4 @@
+name: PluginBase
+version: '${project.version}'
+main: xiamomc.pluginbase.XiaMoJavaPlugin
+api-version: 1.19
