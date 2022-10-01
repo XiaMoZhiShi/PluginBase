@@ -3,6 +3,7 @@ package xiamomc.pluginbase.Command;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.PluginObject;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
@@ -47,11 +48,14 @@ public abstract class CommandHelper<P extends XiaMoJavaPlugin> extends PluginObj
             return false;
     }
 
-    protected List<String> onTabComplete(String[] buffer, CommandSender source)
+    @Nullable
+    public List<String> onTabComplete(String[] buffer, CommandSender source)
     {
-        var baseName = buffer[0];
+        var baseName = buffer[0].replace("/", "");
 
         buffer = ArrayUtils.remove(buffer, 0);
+
+        if (buffer.length == 0) buffer = new String[]{ "" };
 
         for (var c : getCommands())
         {
@@ -59,6 +63,7 @@ public abstract class CommandHelper<P extends XiaMoJavaPlugin> extends PluginObj
                 return c.onTabComplete(baseName, buffer, source);
         }
 
-        return List.of("");
+        return null;
     }
 }
+
