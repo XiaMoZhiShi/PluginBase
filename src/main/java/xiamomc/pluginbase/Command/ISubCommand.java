@@ -1,11 +1,11 @@
 package xiamomc.pluginbase.Command;
 
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public interface IPluginCommand extends CommandExecutor
+public interface ISubCommand
 {
     public String getCommandName();
 
@@ -14,4 +14,5 @@ public interface IPluginCommand extends CommandExecutor
     public String getPermissionRequirement();
 
     public String getHelpMessage();
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args);
 }

@@ -1,6 +1,5 @@
 package xiamomc.pluginbase.Command;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
@@ -49,18 +48,16 @@ public abstract class CommandHelper<P extends XiaMoJavaPlugin> extends PluginObj
     }
 
     @Nullable
-    public List<String> onTabComplete(String[] buffer, CommandSender source)
+    public List<String> onTabComplete(List<String> buffer, CommandSender source)
     {
-        var baseName = buffer[0].replace("/", "");
+        var baseName = buffer.get(0).replace("/", "");
 
-        buffer = ArrayUtils.remove(buffer, 0);
-
-        if (buffer.length == 0) buffer = new String[]{ "" };
+        buffer.remove(0);
 
         for (var c : getCommands())
         {
             if (c.getCommandName().equals(baseName))
-                return c.onTabComplete(baseName, buffer, source);
+                return c.onTabComplete(buffer, source);
         }
 
         return null;
