@@ -12,7 +12,18 @@ import java.util.List;
 
 public abstract class SubCommandHandler<T extends XiaMoJavaPlugin> extends PluginObject<T> implements IPluginCommand
 {
+    /**
+     * 获取所有可用的子命令
+     * @return 子命令列表
+     */
     public abstract List<ISubCommand> getSubCommands();
+
+    /**
+     * 获取注记
+     * @return 注记列表
+     * @implNote 注记列表数量不宜过长
+     */
+    public abstract List<String> getNotes();
 
     private ISubCommand findSubCommandOrNull(String subCommandBaseName, List<ISubCommand> subCommands)
     {

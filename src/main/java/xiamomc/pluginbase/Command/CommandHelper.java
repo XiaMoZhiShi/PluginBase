@@ -7,6 +7,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.PluginObject;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,8 +49,10 @@ public abstract class CommandHelper<P extends XiaMoJavaPlugin> extends PluginObj
     }
 
     @Nullable
-    public List<String> onTabComplete(List<String> buffer, CommandSender source)
+    public List<String> onTabComplete(List<String> args, CommandSender source)
     {
+        var buffer = new ArrayList<>(args);
+
         var baseName = buffer.get(0).replace("/", "");
 
         buffer.remove(0);
