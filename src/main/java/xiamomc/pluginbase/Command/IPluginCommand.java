@@ -9,9 +9,15 @@ public interface IPluginCommand extends CommandExecutor
 {
     public String getCommandName();
 
-    public List<String> onTabComplete(List<String> args, CommandSender source);
+    public default List<String> onTabComplete(List<String> args, CommandSender source)
+    {
+        return null;
+    }
 
-    public String getPermissionRequirement();
+    public default String getPermissionRequirement()
+    {
+        return null;
+    }
 
     public String getHelpMessage();
 }

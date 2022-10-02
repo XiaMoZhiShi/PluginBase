@@ -68,9 +68,10 @@ public abstract class SubCommandHandler<T extends XiaMoJavaPlugin> extends Plugi
             if (subCommand != null)
             {
                 //移除列表中的命令名
-                args.remove(0);
+                var argsCopy = new ArrayList<>(args);
+                argsCopy.remove(0);
 
-                var result = subCommand.onTabComplete(args, source);
+                var result = subCommand.onTabComplete(argsCopy, source);
 
                 return result == null ? emptyStringList : result;
             }

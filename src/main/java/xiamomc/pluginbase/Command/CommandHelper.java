@@ -8,6 +8,7 @@ import xiamomc.pluginbase.PluginObject;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,19 +49,36 @@ public abstract class CommandHelper<P extends XiaMoJavaPlugin> extends PluginObj
             return false;
     }
 
+    private static final List<String> emptyStringList = List.of("");
+
     @Nullable
-    public List<String> onTabComplete(List<String> args, CommandSender source)
+    public List<String> onTabComplete(String rawArgs, CommandSender source)
     {
-        var buffer = new ArrayList<>(args);
+        var args = new ArrayList<>(Arrays.stream(rawArgs.split(" ")).toList());
 
-        var baseName = buffer.get(0).replace("/", "");
+        if (rawArgs.endsWith(" ")) args.add("");
 
-        buffer.remove(0);
+        var baseName = args.get(0).replace("/", "");
+
+        //如果带有namespace
+        if (baseName.contains(":"))
+        {
+            var baseNameSpilted = baseName.split(":");
+
+            if (!Objects.equals(baseNameSpilted[0], getPluginNamespace())) return null;
+
+            baseName = baseNameSpilted[1];
+        }
+
+        args.remove(0);
 
         for (var c : getCommands())
         {
             if (c.getCommandName().equals(baseName))
-                return c.onTabComplete(buffer, source);
+            {
+                var result = c.onTabComplete(args, source);
+                return result == null ? emptyStringList : result;
+            }
         }
 
         return null;
