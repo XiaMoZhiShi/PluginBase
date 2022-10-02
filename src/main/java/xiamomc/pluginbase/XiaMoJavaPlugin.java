@@ -31,7 +31,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
         if (instances.containsKey(getNameSpace()))
             logger.warn("之前似乎已经创建过一个插件实例了...除非你是故意这么做的，不然可能代码又有哪里出bug了！");
 
-        dependencyManager = new DependencyManager(getNameSpace());
+        dependencyManager = new DependencyManager(this);
 
         instances.put(getNameSpace(), this);
     }
@@ -40,6 +40,8 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
     public void onEnable()
     {
         //region 注册依赖
+        dependencyManager.unRegisterPluginInstance(this);
+        dependencyManager.registerPluginInstance(this);
 
         //先反注册一遍所有依赖再注册插件
         dependencyManager.UnCacheAll();
@@ -53,16 +55,21 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
         this.shouldAbortTicking = false;
 
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, this::tick, 0, 1);
+
+        super.onEnable();
     }
 
     @Override
     public void onDisable()
     {
+        super.onDisable();
+
         //禁止tick
         this.shouldAbortTicking = true;
 
         //反注册依赖
         dependencyManager.UnCacheAll();
+        dependencyManager.unRegisterPluginInstance(this);
     }
 
     //region tick相关

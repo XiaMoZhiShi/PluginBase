@@ -1,8 +1,10 @@
 package xiamomc.pluginbase.Managers;
 
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Exceptions.DependencyAlreadyRegistedException;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
+import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,12 +19,22 @@ public class DependencyManager
         return instances.get(namespace);
     }
 
-    public DependencyManager(String namespace)
+    public DependencyManager(XiaMoJavaPlugin plugin)
     {
-        if (instances.containsKey(namespace))
+        registerPluginInstance(plugin);
+    }
+
+    public void registerPluginInstance(XiaMoJavaPlugin plugin)
+    {
+        if (instances.containsKey(plugin.getNameSpace()))
             throw new RuntimeException("已经有一个DependencyManager的实例了");
 
-        instances.put(namespace, this);
+        instances.put(plugin.getNameSpace(), this);
+    }
+
+    public void unRegisterPluginInstance(XiaMoJavaPlugin plugin)
+    {
+        instances.remove(plugin.getNameSpace());
     }
     //endregion 实例相关
 
