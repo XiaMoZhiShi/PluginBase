@@ -12,7 +12,7 @@ import java.util.List;
 
 public abstract class SubCommandHandler<T extends XiaMoJavaPlugin> extends PluginObject<T> implements IPluginCommand
 {
-    protected abstract List<ISubCommand> getSubCommands();
+    public abstract List<ISubCommand> getSubCommands();
 
     private ISubCommand findSubCommandOrNull(String subCommandBaseName, List<ISubCommand> subCommands)
     {
