@@ -106,7 +106,12 @@ public abstract class SubCommandHandler<T extends XiaMoJavaPlugin> extends Plugi
         var cmd = findSubCommandOrNull(subBaseName, getSubCommands());
 
         if (cmd != null)
+        {
+            var perm = cmd.getPermissionRequirement();
+            if (perm != null && !sender.hasPermission(perm)) return false;
+
             return cmd.onCommand(sender, args);
+        }
         else
             return false;
     }
