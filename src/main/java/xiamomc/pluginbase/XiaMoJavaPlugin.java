@@ -28,9 +28,6 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
     public XiaMoJavaPlugin()
     {
-        if (instances.containsKey(getNameSpace()))
-            logger.warn("之前似乎已经创建过一个插件实例了...除非你是故意这么做的，不然可能代码又有哪里出bug了！");
-
         dependencyManager = new DependencyManager(this);
 
         instances.put(getNameSpace(), this);

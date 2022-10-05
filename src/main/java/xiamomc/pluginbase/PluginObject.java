@@ -126,7 +126,7 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
                 catch (IllegalAccessException | InvocationTargetException e)
                 {
                     initializerMethod.setAccessible(false);
-                    throw new RuntimeException(e);
+                    throw new RuntimeException(e.getCause() != null ? e.getCause() : e);
                 }
             }
             else
@@ -161,7 +161,7 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
             catch (IllegalAccessException e)
             {
                 field.setAccessible(false);
-                throw new RuntimeException(e);
+                throw new RuntimeException(e.getCause() != null ? e.getCause() : e);
             }
 
             field.setAccessible(false);
