@@ -1,5 +1,6 @@
 package xiamomc.pluginbase.Command;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -7,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public interface ISubCommand
 {
@@ -17,13 +19,12 @@ public interface ISubCommand
     public default List<String> onTabComplete(List<String> args, CommandSender source)
     {
         var subCommands = getSubCommands();
-        if (subCommands == null || subCommands.length == 0) return null;
+        if (subCommands == null || subCommands.size() == 0) return null;
 
         var cmdBaseName = args.get(0);
 
         //找找有没有符合条件的子命令
-        var cmd = Arrays.stream(subCommands)
-                .filter(c -> c.getCommandName().equals(cmdBaseName)).findFirst();
+        var cmd = subCommands.stream().filter(c -> c.getCommandName().equals(cmdBaseName)).findFirst();
         if (cmd.isPresent()) //如果有则让子命令补全
         {
             args.remove(0);
@@ -69,7 +70,7 @@ public interface ISubCommand
      * @return 指令列表
      */
     @Nullable
-    public default ISubCommand[] getSubCommands() { return null; }
+    public default List<ISubCommand> getSubCommands() { return null; }
 
     /**
      *
@@ -77,5 +78,33 @@ public interface ISubCommand
      * @param args 参数
      * @return 是否成功
      */
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args);
+    public default boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args)
+    {
+        //todo: 可以和SubCommandHandler中onCommand里面的内容合并？
+        String baseName;
+
+        if (args.length >= 1)
+        {
+            baseName = args[0];
+            args = ArrayUtils.remove(args, 0);
+        }
+        else baseName = "";
+
+        if (getSubCommands() == null) return false;
+
+        var cmdOptional = getSubCommands().stream().filter(Objects::nonNull)
+                .filter(c -> c.getCommandName().equals(baseName)).findFirst();
+
+        if (cmdOptional.isPresent())
+        {
+            var cmd = cmdOptional.get();
+
+            var perm = cmd.getPermissionRequirement();
+            if (perm != null && !sender.hasPermission(perm)) return false;
+
+            return cmd.onCommand(sender, args);
+        }
+        else
+            return false;
+    }
 }
