@@ -163,4 +163,9 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
         return si;
     }
+
+    public long getCurrentTick()
+    {
+        return currentTick;
+    }
 }
