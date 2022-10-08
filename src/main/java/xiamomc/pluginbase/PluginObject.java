@@ -2,6 +2,7 @@ package xiamomc.pluginbase;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
@@ -23,7 +24,7 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
     protected final DependencyManager Dependencies = DependencyManager.GetInstance(getPluginNamespace());
     protected final Logger Logger = Plugin.getSLF4JLogger();
 
-    private List<Field> fieldsToResolve;
+    private List<Field> fieldsToResolve = new ArrayList<>();
 
     private final List<Method> initializerMethods = new ArrayList<>();
 
@@ -46,22 +47,9 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
         methods.stream().findFirst().ifPresent(this.initializerMethods::add);
     }
 
-    private void initialDependencyResolve()
+    private void resolveFields(Class<?> clazz)
     {
-        //region 获取初始化方法
-
-        var superclasses = ClassUtils.getAllSuperclasses(this.getClass());
-        Collections.reverse(superclasses);
-        for (var c : superclasses)
-            addInitializermethods(c);
-
-        addInitializermethods(this.getClass());
-
-        //endregion
-
-        //region 解析需要获取依赖的字段
-
-        var ftr = new ArrayList<>(Arrays.stream(this.getClass().getDeclaredFields())
+        var ftr = new ArrayList<>(Arrays.stream(clazz.getDeclaredFields())
                 .filter(f -> f.isAnnotationPresent(Resolved.class)).toList());
 
         var fieldToResolveNow = ftr.stream()
@@ -73,7 +61,29 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
             ftr.remove(f);
         }
 
-        fieldsToResolve = ftr;
+        fieldsToResolve.addAll(ftr);
+    }
+
+    private void initialDependencyResolve()
+    {
+        //region 获取初始化方法
+
+        var superclasses = ClassUtils.getAllSuperclasses(this.getClass());
+        Collections.reverse(superclasses);
+
+        for (var c : superclasses)
+            addInitializermethods(c);
+
+        addInitializermethods(this.getClass());
+
+        //endregion
+
+        //region 解析需要获取依赖的字段
+
+        for (var c : superclasses)
+            resolveFields(c);
+
+        resolveFields(this.getClass());
 
         this.addSchedule(d -> this.resolveRemainingDependencies());
 
