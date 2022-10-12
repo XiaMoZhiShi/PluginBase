@@ -2,6 +2,7 @@ package xiamomc.pluginbase.Command;
 
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 import java.util.List;
 
@@ -19,5 +20,5 @@ public interface IPluginCommand extends CommandExecutor
         return null;
     }
 
-    public String getHelpMessage();
+    public FormattableMessage getHelpMessage();
 }

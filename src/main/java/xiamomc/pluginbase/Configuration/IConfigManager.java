@@ -14,6 +14,16 @@ public interface IConfigManager
     public <T> T get(Class<T> type, ConfigNode path);
 
     /**
+     * 从配置获取值，如果没有，则返回传入的默认值
+     * @param type 目标类型
+     * @param path 配置中的路径
+     * @param defaultValue 默认值
+     * @return 获取到的值
+     * @param <T> 目标类型
+     */
+    public <T> T getOrDefault(Class<T> type, ConfigNode path, T defaultValue);
+
+    /**
      * 向配置路径设置值
      *
      * @param path  目标路径

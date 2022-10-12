@@ -39,6 +39,19 @@ public class PluginConfigManager implements IConfigManager
         return (T) value;
     }
 
+    public <T> T getOrDefault(Class<T> type, ConfigNode node, @Nullable T defaultValue)
+    {
+        var val = get(type, node);
+
+        if (val == null)
+        {
+            set(node, defaultValue);
+            return defaultValue;
+        }
+
+        return val;
+    }
+
     @Override
     public boolean set(ConfigNode node, Object value)
     {

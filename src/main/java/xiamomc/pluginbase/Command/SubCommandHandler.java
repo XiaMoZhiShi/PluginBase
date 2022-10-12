@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.PluginObject;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ public abstract class SubCommandHandler<T extends XiaMoJavaPlugin> extends Plugi
      * @return 注记列表
      * @implNote 注记列表数量不宜过长
      */
-    public abstract List<String> getNotes();
+    public abstract List<FormattableMessage> getNotes();
 
     private ISubCommand findSubCommandOrNull(String subCommandBaseName, List<ISubCommand> subCommands)
     {

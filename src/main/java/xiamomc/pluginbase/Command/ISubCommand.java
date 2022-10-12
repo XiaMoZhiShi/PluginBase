@@ -4,9 +4,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -62,8 +62,7 @@ public interface ISubCommand
      * 获取此指令的帮助信息
      * @return 帮助信息
      */
-    @Nullable
-    public String getHelpMessage();
+    public FormattableMessage getHelpMessage();
 
     /**
      * 获取此子指令下面可用的指令
