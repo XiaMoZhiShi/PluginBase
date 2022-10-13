@@ -20,8 +20,8 @@ import java.util.function.Consumer;
 
 public abstract class PluginObject<P extends XiaMoJavaPlugin>
 {
-    protected final XiaMoJavaPlugin Plugin = P.GetInstance(getPluginNamespace());
-    protected final DependencyManager Dependencies = DependencyManager.GetInstance(getPluginNamespace());
+    protected final XiaMoJavaPlugin Plugin = P.getInstance(getPluginNamespace());
+    protected final DependencyManager Dependencies = DependencyManager.getInstance(getPluginNamespace());
     protected final Logger Logger = Plugin.getSLF4JLogger();
 
     private List<Field> fieldsToResolve = new ArrayList<>();

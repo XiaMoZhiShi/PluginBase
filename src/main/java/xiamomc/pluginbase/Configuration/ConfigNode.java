@@ -15,7 +15,7 @@ public class ConfigNode
     public ConfigNode(String initialNode)
     {
         this.nodes = new ArrayList<>();
-        this.Append(initialNode);
+        this.append(initialNode);
     }
 
     private ConfigNode(List<String> nodes)
@@ -23,7 +23,13 @@ public class ConfigNode
         this.nodes = nodes;
     }
 
+    @Deprecated
     public ConfigNode Append(String node)
+    {
+        return this.append(node);
+    }
+
+    public ConfigNode append(String node)
     {
         if (node == null || node.isBlank() || node.isEmpty())
             throw new IllegalArgumentException("节点名称不能为空");

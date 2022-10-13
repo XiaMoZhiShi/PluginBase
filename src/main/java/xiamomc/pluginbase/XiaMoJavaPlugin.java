@@ -15,7 +15,13 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 {
     private static final Map<String, XiaMoJavaPlugin> instances = new ConcurrentHashMap<>();
 
+    @Deprecated
     public static XiaMoJavaPlugin GetInstance(String nameSpace)
+    {
+        return getInstance(nameSpace);
+    }
+
+    public static XiaMoJavaPlugin getInstance(String nameSpace)
     {
         return instances.get(nameSpace);
     }

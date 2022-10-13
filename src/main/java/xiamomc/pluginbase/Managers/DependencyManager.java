@@ -14,7 +14,13 @@ public class DependencyManager
     //region 实例相关
     private final static Map<String, DependencyManager> instances = new ConcurrentHashMap<>();
 
+    @Deprecated
     public static DependencyManager GetInstance(String namespace)
+    {
+        return getInstance(namespace);
+    }
+
+    public static DependencyManager getInstance(String namespace)
     {
         return instances.get(namespace);
     }
