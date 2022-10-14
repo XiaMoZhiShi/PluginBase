@@ -83,8 +83,6 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
         //设置并保存
         storingObject = (T) targetStore;
 
-        saveConfiguration();
-
         return success;
     }
 
