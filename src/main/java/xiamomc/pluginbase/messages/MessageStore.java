@@ -23,16 +23,6 @@ public abstract class MessageStore<T extends XiaMoJavaPlugin> extends JsonBasedS
         return val;
     }
 
-    public FormattableMessage getFormattable(String key, String val)
-    {
-        return new FormattableMessage(this, key, val);
-    }
-
-    public FormattableMessage getFormattable(String msg)
-    {
-        return new FormattableMessage(this, msg);
-    }
-
     @Override
     protected @NotNull String getFileName()
     {

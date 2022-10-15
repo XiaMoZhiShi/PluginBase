@@ -5,6 +5,8 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.pluginbase.Managers.DependencyManager;
+import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,22 +17,34 @@ public class FormattableMessage implements Comparable<FormattableMessage>
 
     private final String defaultString;
 
-    private final MessageStore<?> store;
+    private MessageStore<?> store;
 
-    public FormattableMessage(MessageStore<?> store, @NotNull String key, @NotNull String defaultString)
+    private MessageStore<?> getStore()
+    {
+        if (store == null)
+            store = DependencyManager.getInstance(nameSpace).Get(MessageStore.class);
+
+        return store;
+    };
+
+    private final String nameSpace;
+
+    public FormattableMessage(@NotNull String pluginNameSpace, @NotNull String key, @NotNull String defaultString)
     {
         this.defaultString = defaultString;
         this.key = key;
 
-        this.store = store;
+        this.nameSpace = pluginNameSpace;
     }
 
-    public FormattableMessage(MessageStore<?> store, String value)
+    public FormattableMessage(@NotNull XiaMoJavaPlugin owningPlugin, @NotNull String key, @NotNull String defaultString)
     {
-        this.key = "_";
-        this.defaultString = value;
+        this(owningPlugin.getNameSpace(), key, defaultString);
+    }
 
-        this.store = store;
+    public FormattableMessage(@NotNull XiaMoJavaPlugin owningPlugin, String value)
+    {
+        this(owningPlugin.getNameSpace(), "_", value);
     }
 
     private final List<TagResolver> resolvers = new ArrayList<>();
@@ -98,11 +112,9 @@ public class FormattableMessage implements Comparable<FormattableMessage>
      */
     public Component toComponent()
     {
-        String msg = key.equals("_") ? defaultString : store.get(key, defaultString);
+        String msg = key.equals("_") ? defaultString : getStore().get(key, defaultString);
 
-        var val = MiniMessage.miniMessage().deserialize(msg, TagResolver.resolver(resolvers));
-
-        return val;
+        return MiniMessage.miniMessage().deserialize(msg, TagResolver.resolver(resolvers));
     }
 
     @Override
