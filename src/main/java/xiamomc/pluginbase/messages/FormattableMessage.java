@@ -7,7 +7,6 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Formattable;
 import java.util.List;
 
 public class FormattableMessage implements Comparable<FormattableMessage>
@@ -16,16 +15,22 @@ public class FormattableMessage implements Comparable<FormattableMessage>
 
     private final String defaultString;
 
-    public FormattableMessage(@NotNull String key, @NotNull String defaultString)
+    private final MessageStore<?> store;
+
+    public FormattableMessage(MessageStore<?> store, @NotNull String key, @NotNull String defaultString)
     {
         this.defaultString = defaultString;
         this.key = key;
+
+        this.store = store;
     }
 
-    public FormattableMessage(String value)
+    public FormattableMessage(MessageStore<?> store, String value)
     {
         this.key = "_";
         this.defaultString = value;
+
+        this.store = store;
     }
 
     private final List<TagResolver> resolvers = new ArrayList<>();
@@ -93,7 +98,7 @@ public class FormattableMessage implements Comparable<FormattableMessage>
      */
     public Component toComponent()
     {
-        String msg = key.equals("_") ? defaultString : MessageStore.getInstance().get(key, defaultString);
+        String msg = key.equals("_") ? defaultString : store.get(key, defaultString);
 
         var val = MiniMessage.miniMessage().deserialize(msg, TagResolver.resolver(resolvers));
 

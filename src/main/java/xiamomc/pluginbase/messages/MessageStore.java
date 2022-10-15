@@ -10,18 +10,6 @@ import java.util.TreeMap;
 
 public abstract class MessageStore<T extends XiaMoJavaPlugin> extends JsonBasedStorage<TreeMap<String, String>, T>
 {
-    public MessageStore()
-    {
-        instance = this;
-    }
-
-    private static MessageStore instance;
-
-    public static MessageStore getInstance()
-    {
-        return instance;
-    }
-
     public String get(String key, String defaultValue)
     {
         var val = storingObject.get(key);
