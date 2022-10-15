@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.TreeMap;
 
-public abstract class MessageStore extends JsonBasedStorage<TreeMap<String, String>, XiaMoJavaPlugin>
+public abstract class MessageStore<T extends XiaMoJavaPlugin> extends JsonBasedStorage<TreeMap<String, String>, T>
 {
     public MessageStore()
     {
