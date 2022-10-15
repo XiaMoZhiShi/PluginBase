@@ -123,7 +123,7 @@ public class FormattableMessage implements Comparable<FormattableMessage>
      * @param depClass 继承MessageStore的对象的Class
      * @return 可以显示的Component
      */
-    public Component toComponent(Class<MessageStore<?>> depClass)
+    public Component toComponent(Class<? extends MessageStore<?>> depClass)
     {
         return toComponent(depManager.get(depClass));
     }
