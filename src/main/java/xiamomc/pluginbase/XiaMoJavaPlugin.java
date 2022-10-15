@@ -26,11 +26,11 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
         return instances.get(nameSpace);
     }
 
-    protected final DependencyManager dependencyManager;
-
     public abstract String getNameSpace();
 
-    private final Logger logger = this.getSLF4JLogger();
+    protected final DependencyManager dependencyManager;
+
+    protected final Logger logger = this.getSLF4JLogger();
 
     public XiaMoJavaPlugin()
     {
@@ -47,11 +47,11 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
         dependencyManager.registerPluginInstance(this);
 
         //先反注册一遍所有依赖再注册插件
-        dependencyManager.UnCacheAll();
+        dependencyManager.unCacheAll();
 
         processExceptionCount();
 
-        dependencyManager.CacheAs(XiaMoJavaPlugin.class, this);
+        dependencyManager.cacheAs(XiaMoJavaPlugin.class, this);
 
         //endregion
 
@@ -71,7 +71,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
         this.shouldAbortTicking = true;
 
         //反注册依赖
-        dependencyManager.UnCacheAll();
+        dependencyManager.unCacheAll();
         dependencyManager.unRegisterPluginInstance(this);
     }
 

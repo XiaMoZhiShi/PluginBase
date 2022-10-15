@@ -17,24 +17,14 @@ public class FormattableMessage implements Comparable<FormattableMessage>
 
     private final String defaultString;
 
-    private MessageStore<?> store;
-
-    private MessageStore<?> getStore()
-    {
-        if (store == null)
-            store = DependencyManager.getInstance(nameSpace).Get(MessageStore.class);
-
-        return store;
-    };
-
-    private final String nameSpace;
+    private final DependencyManager depManager;
 
     public FormattableMessage(@NotNull String pluginNameSpace, @NotNull String key, @NotNull String defaultString)
     {
         this.defaultString = defaultString;
         this.key = key;
 
-        this.nameSpace = pluginNameSpace;
+        depManager = DependencyManager.getInstance(pluginNameSpace);
     }
 
     public FormattableMessage(@NotNull XiaMoJavaPlugin owningPlugin, @NotNull String key, @NotNull String defaultString)
@@ -106,15 +96,45 @@ public class FormattableMessage implements Comparable<FormattableMessage>
         return this;
     }
 
+    private MessageStore<?> store;
+
+    private MessageStore<?> getStore()
+    {
+        if (store == null)
+            store = depManager.get(MessageStore.class);
+
+        return store;
+    };
+
     /**
-     * 转换为Component
+     * 从给定的MessageStore转换为Component
+     * @param store MessageStore
+     * @return 可以显示的Component
+     */
+    public Component toComponent(MessageStore<?> store)
+    {
+        String msg = key.equals("_") ? defaultString : store.get(key, defaultString);
+
+        return MiniMessage.miniMessage().deserialize(msg, TagResolver.resolver(resolvers));
+    }
+
+    /**
+     * 尝试从给定的Class获取MessageStore并转换为Component
+     * @param depClass 继承MessageStore的对象的Class
+     * @return 可以显示的Component
+     */
+    public Component toComponent(Class<MessageStore<?>> depClass)
+    {
+        return toComponent(depManager.get(depClass));
+    }
+
+    /**
+     * 尝试自动转换为Component
      * @return 可以显示的Component
      */
     public Component toComponent()
     {
-        String msg = key.equals("_") ? defaultString : getStore().get(key, defaultString);
-
-        return MiniMessage.miniMessage().deserialize(msg, TagResolver.resolver(resolvers));
+        return toComponent(getStore());
     }
 
     @Override

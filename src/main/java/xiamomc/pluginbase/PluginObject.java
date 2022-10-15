@@ -117,7 +117,7 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
                 for (var p : parameters)
                 {
                     var targetClassType = p.getType();
-                    Object value = Dependencies.Get(targetClassType, false);
+                    Object value = Dependencies.get(targetClassType, false);
 
                     if (value == null) throwDependencyNotFound(targetClassType);
 
@@ -159,7 +159,7 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
                 Class<?> targetClassType = field.getType();
 
                 //从DependencyManager获取值
-                Object value = Dependencies.Get(targetClassType, false);
+                Object value = Dependencies.get(targetClassType, false);
 
                 //判断是不是null
                 if (value == null && !field.getAnnotation(Resolved.class).allowNull())

@@ -47,15 +47,27 @@ public class DependencyManager
     //注册表
     private final Map<Class<?>, Object> registers = new ConcurrentHashMap<>();
 
+    @Deprecated
+    public void Cache(Object obj) throws DependencyAlreadyRegistedException
+    {
+        cache(obj);
+    }
+
     /**
      * 注册一个对象到依赖表中
      *
      * @param obj 要注册的对象
      * @throws DependencyAlreadyRegistedException 该对象所对应的Class是否已被注册
      */
-    public void Cache(Object obj) throws DependencyAlreadyRegistedException
+    public void cache(Object obj) throws DependencyAlreadyRegistedException
     {
-        CacheAs(obj.getClass(), obj);
+        cacheAs(obj.getClass(), obj);
+    }
+
+    @Deprecated
+    public void CacheAs(Class<?> classType, Object obj) throws DependencyAlreadyRegistedException
+    {
+        cacheAs(classType, obj);
     }
 
     /**
@@ -66,7 +78,7 @@ public class DependencyManager
      * @throws DependencyAlreadyRegistedException 是否已经注册过一个相同的classType了
      * @throws IllegalArgumentException           传入的对象不能转化为classType的实例
      */
-    public void CacheAs(Class<?> classType, Object obj) throws DependencyAlreadyRegistedException
+    public void cacheAs(Class<?> classType, Object obj) throws DependencyAlreadyRegistedException
     {
         synchronized (registers)
         {
@@ -82,13 +94,19 @@ public class DependencyManager
         }
     }
 
+    @Deprecated
+    public boolean UnCache(Object obj)
+    {
+        return unCache(obj);
+    }
+
     /**
      * 反注册一个对象
      *
      * @param obj 要反注册的对象
      * @return 是否成功
      */
-    public Boolean UnCache(Object obj)
+    public boolean unCache(Object obj)
     {
         if (!registers.containsValue(obj))
             return false;
@@ -97,12 +115,24 @@ public class DependencyManager
         return true;
     }
 
+    @Deprecated
+    public void UnCacheAll()
+    {
+        this.unCacheAll();
+    }
+
     /**
      * 反注册所有对象
      */
-    public void UnCacheAll()
+    public void unCacheAll()
     {
         registers.clear();
+    }
+
+    @Deprecated
+    public <T> T Get(Class<T> classType)
+    {
+        return get(classType);
     }
 
     /**
@@ -112,13 +142,19 @@ public class DependencyManager
      * @return 找到的对象，返回null则未找到
      * @throws NullDependencyException 依赖未找到时抛出的异常
      */
-    public <T> T Get(Class<T> classType)
+    public <T> T get(Class<T> classType)
     {
-        return this.Get(classType, true);
+        return this.get(classType, true);
+    }
+
+    @Deprecated
+    public <T> T Get(Class<T> classType, boolean throwOnNotFound)
+    {
+        return this.get(classType, throwOnNotFound);
     }
 
     @Nullable
-    public <T> T Get(Class<T> classType, boolean throwOnNotFound)
+    public <T> T get(Class<T> classType, boolean throwOnNotFound)
     {
         if (registers.containsKey(classType))
             return (T) registers.get(classType);
