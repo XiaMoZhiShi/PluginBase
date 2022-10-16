@@ -9,12 +9,14 @@ import java.util.function.Consumer;
 
 public class PluginConfigManager implements IConfigManager
 {
-    private FileConfiguration backendConfig;
-    private final XiaMoJavaPlugin plugin;
+    protected FileConfiguration backendConfig;
+    protected final XiaMoJavaPlugin plugin;
 
     public PluginConfigManager(XiaMoJavaPlugin plugin)
     {
         this.plugin = plugin;
+        plugin.saveDefaultConfig();
+
         this.reload();
     }
 
@@ -57,7 +59,8 @@ public class PluginConfigManager implements IConfigManager
     {
         //spigot的配置管理器没有返回值
         backendConfig.set(node.toString(), value);
-        plugin.saveConfig();
+        save();
+
         return true;
     }
 
@@ -65,9 +68,18 @@ public class PluginConfigManager implements IConfigManager
     public boolean restoreDefaults()
     {
         //没有返回值+1
-        plugin.saveDefaultConfig();
-        plugin.reloadConfig();
+        plugin.saveResource("config.yml", true);
+        plugin.saveConfig();
 
+        reload();
+
+        return true;
+    }
+
+    @Override
+    public boolean save()
+    {
+        plugin.saveConfig();
         return true;
     }
 

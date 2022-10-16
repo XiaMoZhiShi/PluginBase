@@ -40,6 +40,12 @@ public interface IConfigManager
     public boolean restoreDefaults();
 
     /**
+     * 保存配置
+     * @return 操作是否成功
+     */
+    public boolean save();
+
+    /**
      * 刷新配置
      */
     public void reload();
