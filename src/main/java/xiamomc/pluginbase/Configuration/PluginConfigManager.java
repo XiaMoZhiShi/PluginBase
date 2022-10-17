@@ -5,6 +5,8 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class PluginConfigManager implements IConfigManager
@@ -52,6 +54,13 @@ public class PluginConfigManager implements IConfigManager
         }
 
         return val;
+    }
+
+    private final Map<ConfigNode, Object> emptyMap = new HashMap<>();
+
+    public Map<ConfigNode, Object> getAllNotDefault()
+    {
+        return emptyMap;
     }
 
     @Override

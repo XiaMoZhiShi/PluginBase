@@ -1,5 +1,9 @@
 package xiamomc.pluginbase.Configuration;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 import java.util.function.Consumer;
 
 public interface IConfigManager
@@ -22,6 +26,13 @@ public interface IConfigManager
      * @param <T> 目标类型
      */
     public <T> T getOrDefault(Class<T> type, ConfigNode path, T defaultValue);
+
+    /**
+     * 获取所有不是默认值的设置
+     * @return 所有不是默认值的设置
+     */
+    @NotNull
+    public Map<ConfigNode, Object> getAllNotDefault();
 
     /**
      * 向配置路径设置值
