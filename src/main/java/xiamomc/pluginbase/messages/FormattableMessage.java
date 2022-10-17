@@ -113,6 +113,8 @@ public class FormattableMessage implements Comparable<FormattableMessage>
      */
     public Component toComponent(MessageStore<?> store)
     {
+        if (store == null) return Component.text(defaultString);
+
         String msg = key.equals("_") ? defaultString : store.get(key, defaultString);
 
         return MiniMessage.miniMessage().deserialize(msg, TagResolver.resolver(resolvers));
