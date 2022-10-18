@@ -113,8 +113,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
     //一秒内最多能接受多少异常
     //todo: 之后考虑做进配置里让它可调？
-    @SuppressWarnings("FieldCanBeLocal")
-    private final int exceptionLimit = 5;
+    protected final int exceptionLimit = 5;
 
     //已经捕获的异常
     private int exceptionCaught = 0;
@@ -122,9 +121,9 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
     //是否应该中断tick
     private boolean shouldAbortTicking = false;
 
-    private boolean onExceptionCaught(Exception exception, ScheduleInfo scheduleInfo)
+    private void onExceptionCaught(Exception exception, ScheduleInfo scheduleInfo)
     {
-        if (exception == null) return false;
+        if (exception == null) return;
 
         exceptionCaught += 1;
 
@@ -136,8 +135,6 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
             logger.error("可接受异常已到达最大限制");
             this.setEnabled(false);
         }
-
-        return true;
     }
 
     private void processExceptionCount()

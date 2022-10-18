@@ -40,7 +40,7 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
 
             if (!configurationFile.createNewFile())
             {
-                Logger.error("未能创建文件，将不会加载" + getDisplayName() + "的JSON配置！");
+                logger.error("未能创建文件，将不会加载" + getDisplayName() + "的JSON配置！");
                 return;
             }
         }
@@ -73,7 +73,7 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
         }
         catch (Exception e)
         {
-            Logger.warn("无法加载" + getDisplayName() + "的JSON配置：" + e.getMessage());
+            logger.warn("无法加载" + getDisplayName() + "的JSON配置：" + e.getMessage());
             e.printStackTrace();
         }
 
@@ -96,7 +96,7 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
 
             if (!configurationFile.createNewFile())
             {
-                Logger.error("未能创建文件，将不会保存" + getDisplayName() + "的配置！");
+                logger.error("未能创建文件，将不会保存" + getDisplayName() + "的配置！");
                 return false;
             }
 

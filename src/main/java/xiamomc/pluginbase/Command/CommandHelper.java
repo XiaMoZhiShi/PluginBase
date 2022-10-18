@@ -30,7 +30,7 @@ public abstract class CommandHelper<P extends XiaMoJavaPlugin> extends PluginObj
         for (var c : commands)
         {
             if (!this.registerCommand(c))
-                Logger.error("未能注册指令：" + c.getCommandName());
+                logger.error("未能注册指令：" + c.getCommandName());
         }
     }
 

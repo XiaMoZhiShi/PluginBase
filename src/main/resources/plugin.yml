@@ -1,4 +1,6 @@
 name: PluginBase
+authors:
+  - "XiaMoDevTeam"
 version: '${project.version}'
 main: xiamomc.pluginbase.DummyPlugin
 api-version: 1.19

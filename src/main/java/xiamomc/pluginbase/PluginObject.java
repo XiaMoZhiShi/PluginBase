@@ -20,9 +20,20 @@ import java.util.function.Consumer;
 
 public abstract class PluginObject<P extends XiaMoJavaPlugin>
 {
-    protected final XiaMoJavaPlugin Plugin = P.getInstance(getPluginNamespace());
+    protected final XiaMoJavaPlugin plugin = P.getInstance(getPluginNamespace());
+
+    protected final DependencyManager dependencies = DependencyManager.getInstance(getPluginNamespace());
+
+    protected final Logger logger = plugin.getSLF4JLogger();
+
+    @Deprecated
     protected final DependencyManager Dependencies = DependencyManager.getInstance(getPluginNamespace());
-    protected final Logger Logger = Plugin.getSLF4JLogger();
+
+    @Deprecated
+    protected final XiaMoJavaPlugin Plugin = P.getInstance(getPluginNamespace());
+
+    @Deprecated
+    protected final Logger Logger = logger;
 
     private List<Field> fieldsToResolve = new ArrayList<>();
 
@@ -93,7 +104,7 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
         }
         catch (Throwable t)
         {
-            Logger.error("初始化" + this + "失败: " + t.getMessage());
+            logger.error("初始化" + this + "失败: " + t.getMessage());
             t.printStackTrace();
 
             fieldsToResolve.clear();
@@ -128,7 +139,7 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
                 for (var p : parameters)
                 {
                     var targetClassType = p.getType();
-                    Object value = Dependencies.get(targetClassType, false);
+                    Object value = dependencies.get(targetClassType, false);
 
                     if (value == null) throwDependencyNotFound(targetClassType);
 
@@ -170,7 +181,7 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
                 Class<?> targetClassType = field.getType();
 
                 //从DependencyManager获取值
-                Object value = Dependencies.get(targetClassType, false);
+                Object value = dependencies.get(targetClassType, false);
 
                 //判断是不是null
                 if (value == null && !field.getAnnotation(Resolved.class).allowNull())
@@ -211,7 +222,7 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
 
     protected ScheduleInfo addSchedule(Consumer<?> c, int delay)
     {
-        return Plugin.schedule(c, delay);
+        return plugin.schedule(c, delay);
     }
 
     //endregion
