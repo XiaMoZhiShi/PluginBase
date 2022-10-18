@@ -66,28 +66,39 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
 
     private void initialDependencyResolve()
     {
-        //region 获取初始化方法
+        try
+        {
+            //region 获取初始化方法
 
-        var superclasses = ClassUtils.getAllSuperclasses(this.getClass());
-        Collections.reverse(superclasses);
+            var superclasses = ClassUtils.getAllSuperclasses(this.getClass());
+            Collections.reverse(superclasses);
 
-        for (var c : superclasses)
-            addInitializermethods(c);
+            for (var c : superclasses)
+                addInitializermethods(c);
 
-        addInitializermethods(this.getClass());
+            addInitializermethods(this.getClass());
 
-        //endregion
+            //endregion
 
-        //region 解析需要获取依赖的字段
+            //region 解析需要获取依赖的字段
 
-        for (var c : superclasses)
-            resolveFields(c);
+            for (var c : superclasses)
+                resolveFields(c);
 
-        resolveFields(this.getClass());
+            resolveFields(this.getClass());
 
-        this.addSchedule(d -> this.resolveRemainingDependencies());
+            this.addSchedule(d -> this.resolveRemainingDependencies());
 
-        //endregion
+            //endregion
+        }
+        catch (Throwable t)
+        {
+            Logger.error("初始化" + this + "失败: " + t.getMessage());
+            t.printStackTrace();
+
+            fieldsToResolve.clear();
+            initializerMethods.clear();
+        }
     }
 
     private void resolveRemainingDependencies()
