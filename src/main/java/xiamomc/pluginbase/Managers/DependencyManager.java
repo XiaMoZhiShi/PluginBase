@@ -135,6 +135,12 @@ public class DependencyManager
         return get(classType);
     }
 
+    @Deprecated
+    public <T> T Get(Class<T> classType, boolean throwOnNotFound)
+    {
+        return this.get(classType, throwOnNotFound);
+    }
+
     /**
      * 从依赖表获取classType所对应的对象
      *
@@ -145,12 +151,6 @@ public class DependencyManager
     public <T> T get(Class<T> classType)
     {
         return this.get(classType, true);
-    }
-
-    @Deprecated
-    public <T> T Get(Class<T> classType, boolean throwOnNotFound)
-    {
-        return this.get(classType, throwOnNotFound);
     }
 
     @Nullable
