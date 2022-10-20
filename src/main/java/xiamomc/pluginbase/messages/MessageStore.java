@@ -51,7 +51,7 @@ public abstract class MessageStore<T extends XiaMoJavaPlugin> extends JsonBasedS
         return val;
     }
 
-    protected abstract List<Class<IStrings>> getStrings();
+    protected abstract List<Class<? extends IStrings>> getStrings();
 
     public void addMissingStrings()
     {
