@@ -91,13 +91,11 @@ public interface ISubCommand
 
         if (getSubCommands() == null) return false;
 
-        var cmdOptional = getSubCommands().stream().filter(Objects::nonNull)
-                .filter(c -> c.getCommandName().equals(baseName)).findFirst();
+        var cmd = getSubCommands().stream().filter(Objects::nonNull)
+                .filter(c -> c.getCommandName().equals(baseName)).findFirst().orElse(null);
 
-        if (cmdOptional.isPresent())
+        if (cmd != null)
         {
-            var cmd = cmdOptional.get();
-
             var perm = cmd.getPermissionRequirement();
             if (perm != null && !sender.hasPermission(perm)) return false;
 

@@ -90,26 +90,18 @@ public class ConfigSerializeUtils
             //跳过"=="
             if (key.equals("==")) continue;
 
-            Field field = null;
-
             //找到对应的字段
-            var fieldOptional = fieldsToDeSerialize.stream()
+            Field field = fieldsToDeSerialize.stream()
                     .filter(f -> f.getName().equals(key))
-                    .findFirst();
+                    .findFirst().orElse(null);
 
-            var fieldWithAnnotationOptional = fieldsWithAnnotation.stream()
+            var fieldWithAnnotation = fieldsWithAnnotation.stream()
                     .filter(f -> f.getAnnotation(Serializable.class).value().equals(key))
-                    .findFirst();
+                    .findFirst().orElse(null);
 
-            if (fieldOptional.isPresent())
+            if (field == null && fieldWithAnnotation != null)
             {
-                field = fieldOptional.get();
-                fieldsToDeSerialize.remove(field);
-            }
-
-            if (fieldWithAnnotationOptional.isPresent())
-            {
-                field = fieldWithAnnotationOptional.get();
+                field = fieldWithAnnotation;
                 fieldsWithAnnotation.remove(field);
             }
 

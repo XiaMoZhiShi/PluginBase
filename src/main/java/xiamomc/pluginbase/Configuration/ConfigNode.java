@@ -5,7 +5,7 @@ import java.util.List;
 
 public class ConfigNode
 {
-    private List<String> nodes;
+    private final List<String> nodes;
 
     public ConfigNode()
     {
@@ -35,7 +35,8 @@ public class ConfigNode
             throw new IllegalArgumentException("节点名称不能为空");
 
         if (node.contains("."))
-            throw new IllegalArgumentException("节点名称不能包含“.”: " + node);
+            for (var s : node.split("\\."))
+                this.append(s);
 
         nodes.add(node);
         return this;
@@ -62,9 +63,7 @@ public class ConfigNode
         StringBuilder finalValue = new StringBuilder();
 
         for (var n : nodes)
-        {
             finalValue.append(".").append(n);
-        }
 
         return finalValue.toString();
     }
