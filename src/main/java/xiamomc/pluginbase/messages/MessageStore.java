@@ -62,6 +62,7 @@ public abstract class MessageStore<T extends XiaMoJavaPlugin> extends JsonBasedS
         {
             for (var c : classes)
             {
+                //获取所有返回FormattableMessage的方法
                 var methods = Arrays.stream(c.getMethods()).filter(m -> m.getReturnType().equals(FormattableMessage.class)).toList();
 
                 for (var m : methods)
@@ -69,11 +70,12 @@ public abstract class MessageStore<T extends XiaMoJavaPlugin> extends JsonBasedS
                     var formattable = (FormattableMessage) m.invoke(null);
 
                     var key = formattable.getKey();
-                    var defaultValue = formattable.getDefaultString();
 
+                    //如果存储里没有此键，添加进去
                     if (!storingObject.containsKey(key))
-                        storingObject.put(key, defaultValue);
+                        storingObject.put(key, formattable.getDefaultString());
 
+                    //同步到文件
                     saveConfiguration();
                 }
             }
