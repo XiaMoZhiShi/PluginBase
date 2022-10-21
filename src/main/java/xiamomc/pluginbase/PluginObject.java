@@ -162,7 +162,7 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
                 }
             }
             else
-                throw new RuntimeException("初始化方法不能是private");
+                throw new RuntimeException("初始化方法不是private");
         }
     }
 
