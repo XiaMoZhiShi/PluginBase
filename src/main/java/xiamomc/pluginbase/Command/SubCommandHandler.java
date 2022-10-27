@@ -1,5 +1,6 @@
 package xiamomc.pluginbase.Command;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -36,7 +37,7 @@ public abstract class SubCommandHandler<T extends XiaMoJavaPlugin> extends Plugi
         return cmd.orElse(null);
     }
 
-    private final List<String> emptyStringList = new ArrayList<>();
+    private final List<String> emptyStringList = new ObjectArrayList<>();
 
     @Override
     public List<String> onTabComplete(List<String> args, CommandSender source)
@@ -82,7 +83,7 @@ public abstract class SubCommandHandler<T extends XiaMoJavaPlugin> extends Plugi
         }
 
         //否则，则返回所有可用的子命令
-        var list = new ArrayList<String>();
+        var list = new ObjectArrayList<String>();
 
         avaliableSubCommands.forEach(c ->
         {

@@ -1,5 +1,6 @@
 package xiamomc.pluginbase;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +36,9 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
     @Deprecated
     protected final Logger Logger = logger;
 
-    private List<Field> fieldsToResolve = new ArrayList<>();
+    private List<Field> fieldsToResolve = new ObjectArrayList<>();
 
-    private final List<Method> initializerMethods = new ArrayList<>();
+    private final List<Method> initializerMethods = new ObjectArrayList<>();
 
     protected abstract String getPluginNamespace();
 
@@ -133,7 +134,7 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
                 var parameters = initializerMethod.getParameters();
 
                 //对应的值
-                var values = new ArrayList<>();
+                var values = new ObjectArrayList<>();
 
                 //逐个获取依赖
                 for (var p : parameters)

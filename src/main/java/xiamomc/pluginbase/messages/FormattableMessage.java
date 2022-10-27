@@ -1,5 +1,6 @@
 package xiamomc.pluginbase.messages;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -37,7 +38,7 @@ public class FormattableMessage implements Comparable<FormattableMessage>
         this(owningPlugin.getNameSpace(), "_", value);
     }
 
-    private final List<TagResolver> resolvers = new ArrayList<>();
+    private final List<TagResolver> resolvers = new ObjectArrayList<>();
 
     /**
      * 获取消息的Key

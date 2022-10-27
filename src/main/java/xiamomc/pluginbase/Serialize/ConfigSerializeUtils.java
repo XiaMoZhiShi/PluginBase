@@ -1,5 +1,7 @@
 package xiamomc.pluginbase.Serialize;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xiamomc.pluginbase.Annotations.NotSerializable;
@@ -26,7 +28,7 @@ public class ConfigSerializeUtils
                 .filter(f -> !f.isAnnotationPresent(NotSerializable.class)).toList();
 
         //准备HashMap
-        var map = new LinkedHashMap<String, Object>();
+        var map = new Object2ObjectOpenHashMap<String, Object>();
 
         //尝试序列化
         for (var f : fields)
@@ -56,8 +58,11 @@ public class ConfigSerializeUtils
 
     private static void checkDuplicateNames(Object o)
     {
-        var fields = new ArrayList<>(Arrays.stream(o.getClass().getFields()).filter(f -> !f.isAnnotationPresent(NotSerializable.class)).toList());
-        var fieldsWithAnnotation = fields.stream().filter(f -> f.isAnnotationPresent(Serializable.class)).toList();
+        var fields = new ObjectArrayList<>(Arrays.stream(o.getClass().getFields())
+                .filter(f -> !f.isAnnotationPresent(NotSerializable.class)).toList());
+
+        var fieldsWithAnnotation = fields.stream()
+                .filter(f -> f.isAnnotationPresent(Serializable.class)).toList();
 
         fields.removeAll(fieldsWithAnnotation);
 
@@ -74,11 +79,11 @@ public class ConfigSerializeUtils
         checkDuplicateNames(o);
 
         //找到所有要反序列化的字段
-        var fieldsToDeSerialize = new ArrayList<>(Arrays.stream(o.getClass().getDeclaredFields())
+        var fieldsToDeSerialize = new ObjectArrayList<>(Arrays.stream(o.getClass().getDeclaredFields())
                         .filter(f -> !f.isAnnotationPresent(NotSerializable.class)).toList());
 
         //把带有Serializable的字段单独剔出来
-        var fieldsWithAnnotation = new ArrayList<>(fieldsToDeSerialize.stream()
+        var fieldsWithAnnotation = new ObjectArrayList<>(fieldsToDeSerialize.stream()
                 .filter(f -> f.isAnnotationPresent(Serializable.class)).toList());
 
         //并从原来的列表里移出

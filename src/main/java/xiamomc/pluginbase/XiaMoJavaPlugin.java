@@ -1,5 +1,6 @@
 package xiamomc.pluginbase;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
@@ -148,7 +149,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
     //endregion tick相关
 
-    private final List<ScheduleInfo> runnables = new ArrayList<>();
+    private final List<ScheduleInfo> runnables = new ObjectArrayList<>();
 
     public ScheduleInfo schedule(Consumer<?> runnable)
     {

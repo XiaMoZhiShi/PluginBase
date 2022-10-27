@@ -1,14 +1,16 @@
 package xiamomc.pluginbase.messages;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrays;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.JsonBasedStorage;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Map;
 
-public abstract class MessageStore<T extends XiaMoJavaPlugin> extends JsonBasedStorage<TreeMap<String, String>, T>
+public abstract class MessageStore<T extends XiaMoJavaPlugin> extends JsonBasedStorage<Map<String, String>, T>
 {
     public String get(String key, String defaultValue)
     {
@@ -30,9 +32,9 @@ public abstract class MessageStore<T extends XiaMoJavaPlugin> extends JsonBasedS
     }
 
     @Override
-    protected @NotNull TreeMap<String, String> createDefault()
+    protected @NotNull Map<String, String> createDefault()
     {
-        return new TreeMap<>();
+        return new Object2ObjectAVLTreeMap<>();
     }
 
     @Override
