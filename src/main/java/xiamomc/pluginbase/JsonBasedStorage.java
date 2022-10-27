@@ -14,14 +14,23 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
 {
     private File configurationFile;
 
-    private final Gson gson = new GsonBuilder()
+    private static final Gson defaultGson = new GsonBuilder()
             .excludeFieldsWithoutExposeAnnotation()
             .setPrettyPrinting()
             .disableHtmlEscaping()
             .create();
 
+    private final Gson gson;
+
+    protected Gson createGson()
+    {
+        return defaultGson;
+    }
+
     protected JsonBasedStorage()
     {
+        gson = createGson();
+
         storingObject = createDefault();
     }
 
