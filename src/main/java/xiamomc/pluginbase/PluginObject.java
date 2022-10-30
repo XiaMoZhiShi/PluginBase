@@ -214,8 +214,6 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
     //endregion
 
     //region Schedules
-
-    //todo: 使AddSchedule最终由PluginObject自己处理，而不是发给插件
     protected ScheduleInfo addSchedule(Consumer<?> c)
     {
         return this.addSchedule(c, 0);
@@ -223,8 +221,12 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
 
     protected ScheduleInfo addSchedule(Consumer<?> c, int delay)
     {
-        return plugin.schedule(c, delay);
+        return addSchedule(c, delay, false);
     }
 
+    protected ScheduleInfo addSchedule(Consumer<?> c, int delay, boolean isAsync)
+    {
+        return plugin.schedule(c, delay, isAsync);
+    }
     //endregion
 }

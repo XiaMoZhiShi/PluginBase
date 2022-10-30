@@ -86,28 +86,36 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
         if (shouldAbortTicking) return;
 
-        var schedules = new ArrayList<>(runnables);
+        var schedules = new ArrayList<>(this.schedules);
         schedules.forEach(c ->
         {
             if (currentTick - c.TickScheduled >= c.Delay)
             {
-                runnables.remove(c);
+                this.schedules.remove(c);
 
                 if (c.isCanceled()) return;
 
-                //logger.info("执行：" + c + "，当前TICK：" + currentTick);
-                try
-                {
-                    c.Function.accept(null);
-                }
-                catch (Exception e)
-                {
-                    this.onExceptionCaught(e, c);
-                }
+                //logger.info("执行：" + c + "，当前TICK：" + currentTick);\
+                if (c.isAsync)
+                    getServer().getScheduler().runTaskAsynchronously(this, r -> runFunction(c));
+                else
+                    runFunction(c);
             }
         });
 
         schedules.clear();
+    }
+
+    private void runFunction(ScheduleInfo c)
+    {
+        try
+        {
+            c.Function.accept(null);
+        }
+        catch (Exception e)
+        {
+            this.onExceptionCaught(e, c);
+        }
     }
 
     //region tick异常捕捉与处理
@@ -134,7 +142,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
         if (exceptionCaught >= exceptionLimit)
         {
             logger.error("可接受异常已到达最大限制");
-            this.setEnabled(false);
+            this.schedule(c -> setEnabled(false));
         }
     }
 
@@ -149,7 +157,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
     //endregion tick相关
 
-    private final List<ScheduleInfo> runnables = new ObjectArrayList<>();
+    private final List<ScheduleInfo> schedules = new ObjectArrayList<>();
 
     public ScheduleInfo schedule(Consumer<?> runnable)
     {
@@ -158,11 +166,17 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
     public ScheduleInfo schedule(Consumer<?> function, int delay)
     {
-        var si = new ScheduleInfo(function, delay, currentTick);
-        synchronized (runnables)
+        return this.schedule(function, delay, false);
+    }
+
+    public ScheduleInfo schedule(Consumer<?> function, int delay, boolean async)
+    {
+        var si = new ScheduleInfo(function, delay, currentTick, async);
+
+        synchronized (schedules)
         {
             //Logger.info("添加：" + si + "，当前TICK：" + currentTick);
-            runnables.add(si);
+            schedules.add(si);
         }
 
         return si;
