@@ -2,6 +2,8 @@ package xiamomc.pluginbase.Managers;
 
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xiamomc.pluginbase.Exceptions.DependencyAlreadyRegistedException;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xiamomc.pluginbase.XiaMoJavaPlugin;

@@ -17,6 +17,10 @@ public interface IConfigManager
      */
     public <T> T get(Class<T> type, ConfigNode path);
 
+    public <T> Bindable<T> getBindable(Class<T> type, ConfigNode path);
+
+    public <T> Bindable<T> getBindable(Class<T> type, ConfigNode path, T defaultValue);
+
     /**
      * 从配置获取值，如果没有，则返回传入的默认值
      * @param type 目标类型
@@ -41,7 +45,7 @@ public interface IConfigManager
      * @param value 要设置的值
      * @return 设置是否成功
      */
-    public boolean set(ConfigNode path, Object value);
+    public <T> boolean set(ConfigNode path, T value);
 
     /**
      * 恢复默认配置
@@ -66,7 +70,9 @@ public interface IConfigManager
      *
      * @param c 要添加的计划任务
      * @return 添加是否成功
+     * @deprecated 推荐使用 {@link Bindable}
      */
+    @Deprecated
     public boolean onConfigRefresh(Consumer<?> c);
 
     /**
@@ -75,6 +81,8 @@ public interface IConfigManager
      * @param c 要添加的计划任务
      * @param runOnce 是否要立即执行
      * @return 添加是否成功
+     * @deprecated 推荐使用 {@link Bindable}
      */
+    @Deprecated
     public boolean onConfigRefresh(Consumer<?> c, boolean runOnce);
 }
