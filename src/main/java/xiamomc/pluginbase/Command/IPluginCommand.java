@@ -2,7 +2,7 @@ package xiamomc.pluginbase.Command;
 
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import xiamomc.pluginbase.messages.FormattableMessage;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import java.util.List;
 

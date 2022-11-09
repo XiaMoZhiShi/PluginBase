@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.PluginObject;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
-import xiamomc.pluginbase.messages.FormattableMessage;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import java.util.ArrayList;
 import java.util.List;
