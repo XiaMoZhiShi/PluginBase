@@ -1,7 +1,7 @@
 package xiamomc.pluginbase.Configuration;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Map;
 import java.util.function.Consumer;

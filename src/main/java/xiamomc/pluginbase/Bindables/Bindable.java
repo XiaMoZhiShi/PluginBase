@@ -1,12 +1,13 @@
-package xiamomc.pluginbase.Configuration;
+package xiamomc.pluginbase.Bindables;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.BiConsumer;
 
-public class Bindable<T>
+public class Bindable<T> implements IBindable<T>
 {
     private T value;
 
@@ -40,7 +41,8 @@ public class Bindable<T>
         valueChangeConsumers.forEach(c -> c.accept(oldVal, val));
     }
 
-    void setInternal(Object val)
+    @ApiStatus.Internal
+    public void setInternal(Object val)
     {
         set((T) val);
     }
@@ -75,6 +77,15 @@ public class Bindable<T>
 
         set(other.value);
         other.valueChangeConsumers.add(0, ttBiConsumer);
+        bindTarget = other;
+    }
+
+    public void bindTo(IBindable<T> other)
+    {
+        if (!(other instanceof Bindable<T> bindable))
+            throw new IllegalArgumentException("指定的目标不是Bindable实例");
+
+        this.bindTo(bindable);
     }
 
     private final List<BiConsumer<T, T>> valueChangeConsumers = new ObjectArrayList<>();
@@ -102,5 +113,10 @@ public class Bindable<T>
 
         if (runOnce)
             consumer.accept(null, value);
+    }
+
+    @Override
+    public String toString() {
+        return "" + value;
     }
 }

@@ -5,7 +5,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xiamomc.pluginbase.DummyPlugin;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.ArrayList;
