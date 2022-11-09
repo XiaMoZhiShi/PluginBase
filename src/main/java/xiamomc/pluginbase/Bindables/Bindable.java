@@ -20,6 +20,8 @@ public class Bindable<T> implements IBindable<T>
         this.value = value;
     }
 
+    final List<Bindable<T>> binds = new ObjectArrayList<>();
+
     /**
      * 设置此Bindable的值
      *
@@ -27,18 +29,46 @@ public class Bindable<T> implements IBindable<T>
      */
     public void set(T val)
     {
-        if (bindTarget != null)
-        {
-            bindTarget.set(val);
-            return;
-        }
-
         if (value == val) return;
 
         var oldVal = value;
         value = val;
 
-        valueChangeConsumers.forEach(c -> c.accept(oldVal, val));
+        this.triggerValueChange(this, oldVal, val);
+    }
+
+    /**
+     * 在不同的Bindable之间同步值
+     *
+     * @param source 同步来源
+     * @param newVal 新值
+     */
+    private void syncValue(Bindable<T> source, T newVal)
+    {
+        if (source == this || value == newVal) return;
+
+        var oldVal = this.value;
+        this.value = newVal;
+
+        triggerValueChange(source, oldVal, newVal);
+    }
+
+    /**
+     * 触发一次变动时间
+     *
+     * @param source 触发来源
+     * @param newVal 新值
+     */
+    private void triggerValueChange(Bindable<T> source, T oldVal, T newVal)
+    {
+        valueChangeConsumers.forEach(c -> c.accept(oldVal, newVal));
+
+        binds.forEach(b ->
+        {
+            if (b == this) return;
+
+            b.syncValue(source, newVal);
+        });
     }
 
     @ApiStatus.Internal
@@ -60,8 +90,6 @@ public class Bindable<T> implements IBindable<T>
     @Nullable
     private Bindable<T> bindTarget;
 
-    private final BiConsumer<T, T> ttBiConsumer = (o, n) -> this.set(n);
-
     /**
      * 将此Bindable和另外一个Bindable绑定
      * @apiNote 目前一旦绑定将不能解绑
@@ -70,15 +98,24 @@ public class Bindable<T> implements IBindable<T>
      */
     public void bindTo(Bindable<T> other)
     {
-        if (other == null) return;
+        if (other == null || other == this || binds.contains(other)) return;
 
         if (bindTarget != null)
-            bindTarget.valueChangeConsumers.remove(ttBiConsumer);
+        {
+            this.binds.remove(bindTarget);
+            bindTarget.binds.remove(this);
+        }
+
+        //让other改变值时可以触发这里的triggerValueChange
+        other.binds.add(this);
+
+        //让这里改变值时也可以触发other的triggerValueChange
+        this.binds.add(other);
 
         set(other.value);
-        other.valueChangeConsumers.add(0, ttBiConsumer);
         bindTarget = other;
     }
+
 
     public void bindTo(IBindable<T> other)
     {
