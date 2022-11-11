@@ -3,10 +3,8 @@ package xiamomc.pluginbase.Bindables;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.lang.ref.WeakReference;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 public class BindableList<T> implements IBindableList<T>
@@ -46,9 +44,31 @@ public class BindableList<T> implements IBindableList<T>
             consumer.accept(new ObjectArrayList<>(list), TriggerReason.ADD);
     }
 
+    private void removeReleasedRefs()
+    {
+        binds.removeIf(ref -> ref.get() == null);
+    }
+
+    private int triggers;
+
     private void triggerChange(BindableList<T> source, List<T> value, TriggerReason reason)
     {
-        binds.forEach(b -> b.syncValue(source, value, reason));
+        triggers++;
+
+        if (triggers >= 5)
+        {
+            removeReleasedRefs();
+            triggers = 0;
+        }
+
+        binds.forEach(ref ->
+        {
+            var b = ref.get();
+            if (b == null) return;
+
+            b.syncValue(source, value, reason);
+        });
+
         consumers.forEach(c -> c.accept(value, reason));
     }
 
@@ -84,9 +104,11 @@ public class BindableList<T> implements IBindableList<T>
             list.removeAll(changes);
     }
 
-    final List<BindableList<T>> binds = new ObjectArrayList<>();
+    final List<WeakReference<BindableList<T>>> binds = new ObjectArrayList<>();
 
     private BindableList<T> bindTarget;
+
+    private final WeakReference<BindableList<T>> weakRef = new WeakReference<>(this);
 
     @Override
     public void bindTo(IBindableList<T> other)
@@ -99,22 +121,22 @@ public class BindableList<T> implements IBindableList<T>
 
     public void bindTo(BindableList<T> other)
     {
-        if (other == null || other == this || binds.contains(other)) return;
+        if (other == null || other == this || binds.contains(other.weakRef)) return;
 
         if (bindTarget != null)
         {
-            this.binds.remove(bindTarget);
-            bindTarget.binds.remove(this);
+            this.binds.remove(bindTarget.weakRef);
+            bindTarget.binds.remove(this.weakRef);
         }
 
         this.clear();
         this.addAll(other.list);
 
         //让other改变值时可以触发这里的triggerValueChange
-        other.binds.add(this);
+        other.binds.add(this.weakRef);
 
         //让这里改变值时也可以触发other的triggerValueChange
-        this.binds.add(other);
+        this.binds.add(other.weakRef);
 
         bindTarget = other;
     }

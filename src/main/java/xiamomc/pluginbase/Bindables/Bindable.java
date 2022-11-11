@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -20,7 +21,7 @@ public class Bindable<T> implements IBindable<T>
         this.value = value;
     }
 
-    final List<Bindable<T>> binds = new ObjectArrayList<>();
+    private final List<WeakReference<Bindable<T>>> binds = new ObjectArrayList<>();
 
     /**
      * 设置此Bindable的值
@@ -53,6 +54,8 @@ public class Bindable<T> implements IBindable<T>
         triggerValueChange(source, oldVal, newVal);
     }
 
+    private int triggers;
+
     /**
      * 触发一次变动时间
      *
@@ -61,11 +64,20 @@ public class Bindable<T> implements IBindable<T>
      */
     private void triggerValueChange(Bindable<T> source, T oldVal, T newVal)
     {
+        triggers++;
+
+        if (triggers >= 5)
+        {
+            removeReleasedRefs();
+            triggers = 0;
+        }
+
         valueChangeConsumers.forEach(c -> c.accept(oldVal, newVal));
 
-        binds.forEach(b ->
+        binds.forEach(ref ->
         {
-            if (b == this) return;
+            var b = ref.get();
+            if (b == this || b == null) return;
 
             b.syncValue(source, newVal);
         });
@@ -90,6 +102,11 @@ public class Bindable<T> implements IBindable<T>
     @Nullable
     private Bindable<T> bindTarget;
 
+    private void removeReleasedRefs()
+    {
+        binds.removeIf(ref -> ref.get() == null);
+    }
+
     /**
      * 将此Bindable和另外一个Bindable绑定
      * @apiNote 目前一旦绑定将不能解绑
@@ -98,24 +115,25 @@ public class Bindable<T> implements IBindable<T>
      */
     public void bindTo(Bindable<T> other)
     {
-        if (other == null || other == this || binds.contains(other)) return;
+        if (other == null || other == this || binds.contains(other.weakRef)) return;
 
         if (bindTarget != null)
         {
-            this.binds.remove(bindTarget);
-            bindTarget.binds.remove(this);
+            this.binds.remove(bindTarget.weakRef);
+            bindTarget.binds.remove(weakRef);
         }
 
         //让other改变值时可以触发这里的triggerValueChange
-        other.binds.add(this);
+        other.binds.add(weakRef);
 
         //让这里改变值时也可以触发other的triggerValueChange
-        this.binds.add(other);
+        this.binds.add(other.weakRef);
 
         set(other.value);
         bindTarget = other;
     }
 
+    private final WeakReference<Bindable<T>> weakRef = new WeakReference<>(this);
 
     public void bindTo(IBindable<T> other)
     {
