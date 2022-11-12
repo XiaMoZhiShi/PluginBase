@@ -3,6 +3,7 @@ package xiamomc.pluginbase.Bindables;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.WeakReferenceList;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -21,7 +22,7 @@ public class Bindable<T> implements IBindable<T>
         this.value = value;
     }
 
-    private final List<WeakReference<Bindable<T>>> binds = new ObjectArrayList<>();
+    private final WeakReferenceList<Bindable<T>> binds = new WeakReferenceList<>();
 
     /**
      * 设置此Bindable的值
@@ -74,9 +75,8 @@ public class Bindable<T> implements IBindable<T>
 
         valueChangeConsumers.forEach(c -> c.accept(oldVal, newVal));
 
-        binds.forEach(ref ->
+        binds.forEach(b ->
         {
-            var b = ref.get();
             if (b == this || b == null) return;
 
             b.syncValue(source, newVal);
@@ -104,7 +104,7 @@ public class Bindable<T> implements IBindable<T>
 
     private void removeReleasedRefs()
     {
-        binds.removeIf(ref -> ref.get() == null);
+        binds.removeNull();
     }
 
     /**

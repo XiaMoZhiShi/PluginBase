@@ -2,6 +2,7 @@ package xiamomc.pluginbase.Bindables;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.pluginbase.WeakReferenceList;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -46,7 +47,7 @@ public class BindableList<T> implements IBindableList<T>
 
     private void removeReleasedRefs()
     {
-        binds.removeIf(ref -> ref.get() == null);
+        binds.removeNull();
     }
 
     private int triggers;
@@ -61,9 +62,8 @@ public class BindableList<T> implements IBindableList<T>
             triggers = 0;
         }
 
-        binds.forEach(ref ->
+        binds.forEach(b ->
         {
-            var b = ref.get();
             if (b == null) return;
 
             b.syncValue(source, value, reason);
@@ -104,7 +104,7 @@ public class BindableList<T> implements IBindableList<T>
             list.removeAll(changes);
     }
 
-    final List<WeakReference<BindableList<T>>> binds = new ObjectArrayList<>();
+    final WeakReferenceList<BindableList<T>> binds = new WeakReferenceList<>();
 
     private BindableList<T> bindTarget;
 
