@@ -1,4 +1,4 @@
-package xiamomc.pluginbase.Serialize;
+package xiamomc.pluginbase.Utilities;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
