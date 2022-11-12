@@ -19,10 +19,15 @@ public class BindableList<T> implements IBindableList<T>
 
     public BindableList()
     {
+        this.nullTList = new ArrayList<T>();
+
+        nullTList.add(null);
     }
 
     public BindableList(Collection<T> collection)
     {
+        this();
+
         this.list.addAll(collection);
     }
 
@@ -72,9 +77,11 @@ public class BindableList<T> implements IBindableList<T>
         consumers.forEach(c -> c.accept(value, reason));
     }
 
+    private final List<T> nullTList;
+
     private void triggerChange(BindableList<T> source, T value, TriggerReason reason)
     {
-        this.triggerChange(source, List.of(value), reason);
+        this.triggerChange(source, value == null ? nullTList : List.of(value), reason);
     }
 
     void triggerChange(T value, TriggerReason reason)
@@ -144,16 +151,6 @@ public class BindableList<T> implements IBindableList<T>
     //endregion Bindable
 
     //region List
-
-    public T insert(int i, T t)
-    {
-        if (list.contains(t)) return null;
-
-        list.add(i, t);
-        this.triggerChange(t, TriggerReason.ADD);
-
-        return t;
-    }
 
     public int size()
     {
@@ -278,7 +275,13 @@ public class BindableList<T> implements IBindableList<T>
     @Override
     public T set(int i, T t)
     {
-        var val = this.insert(i, t);
+        if (t == null && i < list.size())
+        {
+            var oldVal = list.get(i);
+            triggerChange(oldVal, TriggerReason.REMOVE);
+        }
+
+        var val = list.set(i, t);
 
         if (val != null)
             triggerChange(t, TriggerReason.ADD);
@@ -341,7 +344,7 @@ public class BindableList<T> implements IBindableList<T>
         while (it.hasNext())
         {
             var obj = it.next();
-            builder.append(obj.toString());
+            builder.append(obj);
 
             if (it.hasNext()) builder.append(", ");
         }
