@@ -275,7 +275,7 @@ public class BindableList<T> implements IBindableList<T>
     @Override
     public T set(int i, T t)
     {
-        if (t == null && i < list.size())
+        if (i < list.size())
         {
             var oldVal = list.get(i);
             triggerChange(oldVal, TriggerReason.REMOVE);
