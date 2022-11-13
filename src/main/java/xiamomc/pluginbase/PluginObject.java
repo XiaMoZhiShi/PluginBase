@@ -3,7 +3,6 @@ package xiamomc.pluginbase;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
@@ -28,10 +27,10 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
     protected final Logger logger = plugin.getSLF4JLogger();
 
     @Deprecated
-    protected final DependencyManager Dependencies = DependencyManager.getInstance(getPluginNamespace());
+    protected final DependencyManager Dependencies = dependencies;
 
     @Deprecated
-    protected final XiaMoJavaPlugin Plugin = P.getInstance(getPluginNamespace());
+    protected final XiaMoJavaPlugin Plugin = plugin;
 
     @Deprecated
     protected final Logger Logger = logger;
@@ -49,7 +48,7 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
 
     //region 依赖处理
 
-    private void addInitializermethods(Class<?> clazz)
+    private void addInitializerMethods(Class<?> clazz)
     {
         var methods = Arrays.stream(clazz.getDeclaredMethods())
                 .filter(m -> m.isAnnotationPresent(Initializer.class)).toList();
@@ -86,9 +85,9 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
             Collections.reverse(superclasses);
 
             for (var c : superclasses)
-                addInitializermethods(c);
+                addInitializerMethods(c);
 
-            addInitializermethods(this.getClass());
+            addInitializerMethods(this.getClass());
 
             //endregion
 
