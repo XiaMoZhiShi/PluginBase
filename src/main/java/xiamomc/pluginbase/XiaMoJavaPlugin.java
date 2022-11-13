@@ -56,7 +56,8 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
         //endregion
 
-        this.shouldAbortTicking = false;
+        this.cancelSchedules = false;
+        this.acceptSchedules = true;
 
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, this::tick, 0, 1);
 
@@ -69,7 +70,8 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
         super.onDisable();
 
         //禁止tick
-        this.shouldAbortTicking = true;
+        this.cancelSchedules = true;
+        this.acceptSchedules = false;
 
         //反注册依赖
         dependencyManager.unCacheAll();
@@ -84,16 +86,23 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
     {
         currentTick += 1;
 
-        if (shouldAbortTicking) return;
+        if (cancelSchedules) return;
 
         var schedules = new ArrayList<>(this.schedules);
         schedules.forEach(c ->
         {
+            if (c.isCanceled())
+            {
+                this.schedules.remove(c);
+                return;
+            }
+
             if (currentTick - c.TickScheduled >= c.Delay)
             {
                 this.schedules.remove(c);
 
-                if (c.isCanceled()) return;
+                //Allows us to cancel half-way
+                if (cancelSchedules) return;
 
                 //logger.info("执行：" + c + "，当前TICK：" + currentTick);\
                 if (c.isAsync)
@@ -108,6 +117,8 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
     private void runFunction(ScheduleInfo c)
     {
+        if (cancelSchedules) return;
+
         try
         {
             c.Function.accept(null);
@@ -120,17 +131,28 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
     //region tick异常捕捉与处理
 
-    //一秒内最多能接受多少异常
-    //todo: 之后考虑做进配置里让它可调？
+    //5 ticks内最多能接受多少异常
     protected final int exceptionLimit = 5;
+
+    protected int getExceptionLimit()
+    {
+        return exceptionLimit;
+    }
 
     //已经捕获的异常
     private int exceptionCaught = 0;
 
-    //是否应该中断tick
-    private boolean shouldAbortTicking = false;
+    /**
+     * Should we cancel executing schedules?
+     */
+    private boolean cancelSchedules = false;
 
-    private void onExceptionCaught(Exception exception, ScheduleInfo scheduleInfo)
+    /**
+     * Should we accept any further {@link XiaMoJavaPlugin#schedule} calls?
+     */
+    private boolean acceptSchedules = true;
+
+    private synchronized void onExceptionCaught(Exception exception, ScheduleInfo scheduleInfo)
     {
         if (exception == null) return;
 
@@ -139,10 +161,12 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
         logger.warn("执行" + scheduleInfo + "时捕获到未处理的异常：");
         exception.printStackTrace();
 
-        if (exceptionCaught >= exceptionLimit)
+        if (exceptionCaught >= getExceptionLimit())
         {
-            logger.error("可接受异常已到达最大限制");
-            this.schedule(c -> setEnabled(false));
+            logger.error("可接受异常已到达最大限制: " + exceptionCaught + " -> " + getExceptionLimit());
+
+            this.schedules.clear();
+            this.setEnabled(false);
         }
     }
 
@@ -172,6 +196,12 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
     public ScheduleInfo schedule(Consumer<?> function, int delay, boolean async)
     {
         var si = new ScheduleInfo(function, delay, currentTick, async);
+
+        if (!acceptSchedules)
+        {
+            si.cancel();
+            return si;
+        }
 
         synchronized (schedules)
         {
