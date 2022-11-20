@@ -6,7 +6,7 @@
 
     <groupId>com.github.XiaMoZhiShi</groupId>
     <artifactId>PluginBase</artifactId>
-    <version>0.0.21-alpha</version>
+    <version>0.0.22-alpha</version>
     <packaging>jar</packaging>
 
     <name>Pluginbase</name>
