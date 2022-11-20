@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 import xiamomc.pluginbase.Managers.DependencyManager;
+import xiamomc.pluginbase.Utilities.PluginSoftDependManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +32,14 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
     protected final DependencyManager dependencyManager;
 
+    protected final PluginSoftDependManager softDeps;
+
     protected final Logger logger = this.getSLF4JLogger();
 
     public XiaMoJavaPlugin()
     {
         dependencyManager = new DependencyManager(this);
+        softDeps = new PluginSoftDependManager(this);
 
         instances.put(getNameSpace(), this);
     }
