@@ -125,7 +125,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
         try
         {
-            c.Function.accept(null);
+            c.Function.run();
         }
         catch (Exception e)
         {
@@ -178,7 +178,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
     {
         exceptionCaught -= 1;
 
-        this.schedule(c -> processExceptionCount(), 5);
+        this.schedule(this::processExceptionCount, 5);
     }
 
     //endregion tick异常捕捉与处理
@@ -187,17 +187,35 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
     private final List<ScheduleInfo> schedules = new ObjectArrayList<>();
 
-    public ScheduleInfo schedule(Consumer<?> runnable)
+    @Deprecated
+    public ScheduleInfo schedule(Consumer<?> consumer)
+    {
+        return this.schedule(() -> consumer.accept(null));
+    }
+
+    @Deprecated
+    public ScheduleInfo schedule(Consumer<?> c, int delay)
+    {
+        return this.schedule(() -> c.accept(null), delay);
+    }
+
+    @Deprecated
+    public ScheduleInfo schedule(Consumer<?> c, int delay, boolean isAsync)
+    {
+        return this.schedule(() -> c.accept(null), delay, isAsync);
+    }
+
+    public ScheduleInfo schedule(Runnable runnable)
     {
         return this.schedule(runnable, 1);
     }
 
-    public ScheduleInfo schedule(Consumer<?> function, int delay)
+    public ScheduleInfo schedule(Runnable function, int delay)
     {
         return this.schedule(function, delay, false);
     }
 
-    public ScheduleInfo schedule(Consumer<?> function, int delay, boolean async)
+    public ScheduleInfo schedule(Runnable function, int delay, boolean async)
     {
         var si = new ScheduleInfo(function, delay, currentTick, async);
 

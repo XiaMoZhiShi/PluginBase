@@ -98,7 +98,7 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
 
             resolveFields(this.getClass());
 
-            this.addSchedule(d -> this.resolveRemainingDependencies());
+            this.addSchedule(this::resolveRemainingDependencies);
 
             //endregion
         }
@@ -213,19 +213,37 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
     //endregion
 
     //region Schedules
+    @Deprecated
     protected ScheduleInfo addSchedule(Consumer<?> c)
     {
-        return this.addSchedule(c, 0);
+        return this.addSchedule(() -> c.accept(null), 0);
     }
 
+    @Deprecated
     protected ScheduleInfo addSchedule(Consumer<?> c, int delay)
     {
-        return addSchedule(c, delay, false);
+        return this.addSchedule(() -> c.accept(null), delay);
     }
 
+    @Deprecated
     protected ScheduleInfo addSchedule(Consumer<?> c, int delay, boolean isAsync)
     {
-        return plugin.schedule(c, delay, isAsync);
+        return this.addSchedule(() -> c.accept(null), delay, isAsync);
+    }
+
+    protected ScheduleInfo addSchedule(Runnable r)
+    {
+        return plugin.schedule(r);
+    }
+
+    protected ScheduleInfo addSchedule(Runnable r, int delay)
+    {
+        return plugin.schedule(r, delay);
+    }
+
+    protected ScheduleInfo addSchedule(Runnable r, int delay, boolean isAsync)
+    {
+        return plugin.schedule(r, delay, isAsync);
     }
     //endregion
 }

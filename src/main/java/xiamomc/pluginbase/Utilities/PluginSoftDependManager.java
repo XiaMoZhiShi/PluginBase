@@ -28,7 +28,7 @@ public class PluginSoftDependManager implements Listener
     {
         registerPluginInstance(plugin);
 
-        plugin.schedule(c ->
+        plugin.schedule(() ->
         {
             for (Plugin pl : Bukkit.getPluginManager().getPlugins())
                 this.onEnable(pl.getName());
