@@ -1,6 +1,7 @@
 package xiamomc.pluginbase.Managers;
 
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,30 @@ public class DependencyManager
         return instances.get(namespace);
     }
 
+    /**
+     * 获取或创建某个插件的依赖管理器
+     * @param pluginInstance 插件实例
+     * @return 此插件的依赖管理器
+     */
+    @Contract("null -> null; !null -> !null")
+    @Nullable
+    public static DependencyManager getManagerOrCreate(XiaMoJavaPlugin pluginInstance)
+    {
+        if (pluginInstance == null) return null;
+
+        var depMgr = instances.get(pluginInstance.getNameSpace());
+        if (depMgr != null) return depMgr;
+
+        depMgr = new DependencyManager(pluginInstance);
+
+        return depMgr;
+    }
+
+    /**
+     * @deprecated 建议使用 {@link DependencyManager#getManagerOrCreate(XiaMoJavaPlugin)}
+     * @param plugin 插件实例
+     */
+    @Deprecated
     public DependencyManager(XiaMoJavaPlugin plugin)
     {
         registerPluginInstance(plugin);
@@ -35,7 +60,10 @@ public class DependencyManager
     public void registerPluginInstance(XiaMoJavaPlugin plugin)
     {
         if (instances.containsKey(plugin.getNameSpace()))
-            throw new RuntimeException("已经有一个DependencyManager的实例了");
+        {
+            LoggerFactory.getLogger("XiaMoBase").warn("已经有一个 " + plugin.getNameSpace() + "的DependencyManager实例了");
+            Thread.dumpStack();
+        }
 
         instances.put(plugin.getNameSpace(), this);
     }

@@ -38,8 +38,8 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
     public XiaMoJavaPlugin()
     {
-        dependencyManager = new DependencyManager(this);
-        softDeps = new PluginSoftDependManager(this);
+        dependencyManager = DependencyManager.getManagerOrCreate(this);
+        softDeps = PluginSoftDependManager.getManagerOrCreate(this);
 
         instances.put(getNameSpace(), this);
     }
@@ -50,6 +50,8 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
         //region 注册依赖
         dependencyManager.unRegisterPluginInstance(this);
         dependencyManager.registerPluginInstance(this);
+
+        softDeps.clearHandles();
 
         //先反注册一遍所有依赖再注册插件
         dependencyManager.unCacheAll();
@@ -80,6 +82,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
         //反注册依赖
         dependencyManager.unCacheAll();
         dependencyManager.unRegisterPluginInstance(this);
+        softDeps.unRegisterPluginInstance(this);
     }
 
     //region tick相关

@@ -7,7 +7,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.Map;
@@ -24,6 +26,26 @@ public class PluginSoftDependManager implements Listener
         return instances.get(namespace);
     }
 
+    /**
+     * 获取或创建某个插件的依赖管理器
+     * @param pluginInstance 插件实例
+     * @return 此插件的依赖管理器
+     */
+    @Contract("null -> null; !null -> !null")
+    @Nullable
+    public static PluginSoftDependManager getManagerOrCreate(XiaMoJavaPlugin pluginInstance)
+    {
+        if (pluginInstance == null) return null;
+
+        var depMgr = instances.get(pluginInstance.getNameSpace());
+        if (depMgr != null) return depMgr;
+
+        depMgr = new PluginSoftDependManager(pluginInstance);
+
+        return depMgr;
+    }
+
+    @Deprecated
     public PluginSoftDependManager(XiaMoJavaPlugin plugin)
     {
         registerPluginInstance(plugin);
@@ -96,5 +118,11 @@ public class PluginSoftDependManager implements Listener
 
         if (consumer != null)
             consumer.accept(null);
+    }
+
+    public void clearHandles()
+    {
+        onDisableStrToConsumerMap.clear();
+        onEnableStrToConsumerMap.clear();
     }
 }
