@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 
 public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends PluginObject<P>
 {
-    private File configurationFile;
+    protected File configurationFile;
 
     private static final Gson defaultGson = new GsonBuilder()
             .excludeFieldsWithoutExposeAnnotation()
@@ -34,27 +34,44 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
         storingObject = createDefault();
     }
 
-    @Initializer
-    private void load(XiaMoJavaPlugin plugin) throws IOException
+    protected boolean storageInitialized;
+
+    public void initializeStorage()
     {
-        //初始化配置文件
-        if (configurationFile == null)
-            configurationFile = new File(URI.create(plugin.getDataFolder().toURI() + "/" + getFileName()));
-
-        if (!configurationFile.exists())
+        try
         {
-            //创建父目录
-            if (!configurationFile.getParentFile().exists())
-                Files.createDirectories(Paths.get(configurationFile.getParentFile().toURI()));
+            //初始化配置文件
+            if (configurationFile == null)
+                configurationFile = new File(URI.create(plugin.getDataFolder().toURI() + "/" + getFileName()));
 
-            if (!configurationFile.createNewFile())
+            if (!configurationFile.exists())
             {
-                logger.error("未能创建文件，将不会加载" + getDisplayName() + "的JSON配置！");
-                return;
+                //创建父目录
+                if (!configurationFile.getParentFile().exists())
+                    Files.createDirectories(Paths.get(configurationFile.getParentFile().toURI()));
+
+                if (!configurationFile.createNewFile())
+                {
+                    logger.error("未能创建文件，将不会加载" + getDisplayName() + "的JSON配置！");
+                    return;
+                }
             }
+        }
+        catch (Throwable t)
+        {
+            logger.warn("未能初始化" + getDisplayName() + "的JSON配置：" + t.getMessage());
+            t.printStackTrace();
         }
 
         reloadConfiguration();
+        storageInitialized = true;
+    }
+
+    @Initializer
+    private void load()
+    {
+        if (!storageInitialized)
+            initializeStorage();
     }
 
     @NotNull

@@ -6,6 +6,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
@@ -89,9 +90,31 @@ public class FormattableMessage implements Comparable<FormattableMessage>
      * @param formattable 要解析的值
      * @return 对此对象的引用
      */
-    public FormattableMessage resolve(String target, FormattableMessage formattable)
+    public FormattableMessage resolve(String target, FormattableMessage formattable, String locale)
     {
-        resolvers.add(Placeholder.component(target, formattable.toComponent()));
+        if (locale == null) locale = this.locale;
+
+        resolvers.add(Placeholder.component(target, formattable.toComponent(locale)));
+
+        return this;
+    }
+
+    public FormattableMessage resolve(String target, FormattableMessage formattableMessage)
+    {
+        return this.resolve(target, formattableMessage, this.locale);
+    }
+
+    private String locale = null;
+
+    @Nullable
+    public String getLocale()
+    {
+        return locale;
+    }
+
+    public FormattableMessage withLocale(String locale)
+    {
+        this.locale = locale;
 
         return this;
     }
@@ -111,11 +134,13 @@ public class FormattableMessage implements Comparable<FormattableMessage>
      * @param store MessageStore
      * @return 可以显示的Component
      */
-    public Component toComponent(MessageStore<?> store)
+    public Component toComponent(@Nullable String locale, MessageStore<?> store)
     {
         if (store == null) return Component.text(defaultString);
 
-        String msg = key.equals("_") ? defaultString : store.get(key, defaultString);
+        if (locale == null) locale = this.locale;
+
+        String msg = key.equals("_") ? defaultString : store.get(key, defaultString, locale);
 
         return MiniMessage.miniMessage().deserialize(msg, TagResolver.resolver(resolvers));
     }
@@ -125,18 +150,18 @@ public class FormattableMessage implements Comparable<FormattableMessage>
      * @param depClass 继承MessageStore的对象的Class
      * @return 可以显示的Component
      */
-    public Component toComponent(Class<? extends MessageStore<?>> depClass)
+    public Component toComponent(@Nullable String locale, Class<? extends MessageStore<?>> depClass)
     {
-        return toComponent(depManager.get(depClass));
+        return toComponent(locale, depManager.get(depClass));
     }
 
     /**
      * 尝试自动转换为Component
      * @return 可以显示的Component
      */
-    public Component toComponent()
+    public Component toComponent(@Nullable String locale)
     {
-        return toComponent(getStore());
+        return toComponent(locale, getStore());
     }
 
     @Override

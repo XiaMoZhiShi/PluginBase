@@ -2,6 +2,7 @@ package xiamomc.pluginbase.Messages;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.JsonBasedStorage;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
@@ -11,7 +12,15 @@ import java.util.Map;
 
 public abstract class MessageStore<T extends XiaMoJavaPlugin> extends JsonBasedStorage<Map<String, String>, T>
 {
-    public String get(String key, String defaultValue)
+    /**
+     * 从此消息存储获取与消息对应的字符串
+     * @param key 消息的存储键名
+     * @param defaultValue 默认值
+     * @param locale locale
+     * @return 此消息键对应的字符串
+     * @apiNote 默认实现不会考虑locale参数
+     */
+    public String get(String key, @Nullable String defaultValue, @Nullable String locale)
     {
         var val = storingObject.get(key);
 
@@ -56,7 +65,6 @@ public abstract class MessageStore<T extends XiaMoJavaPlugin> extends JsonBasedS
 
     public void addMissingStrings()
     {
-        //todo: 扫描整个messages下继承IStrings的对象，而不是用List.of暴力枚举
         var classes = getStrings();
 
         try
