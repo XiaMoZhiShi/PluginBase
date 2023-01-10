@@ -65,7 +65,7 @@ public abstract class CommandHelper<P extends XiaMoJavaPlugin> extends PluginObj
         {
             var baseNameSpilted = baseName.split(":");
 
-            if (!Objects.equals(baseNameSpilted[0], getPluginNamespace())) return null;
+            if (!Objects.equals(baseNameSpilted[0], plugin.getName().toLowerCase())) return null;
 
             baseName = baseNameSpilted[1];
         }
