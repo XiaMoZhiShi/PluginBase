@@ -164,6 +164,15 @@ public class FormattableMessage implements Comparable<FormattableMessage>
         return toComponent(locale, getStore());
     }
 
+    /**
+     * 尝试自动转换为Component
+     * @return 可以显示的Component
+     */
+    public Component toComponent()
+    {
+        return toComponent(null, getStore());
+    }
+
     @Override
     public int compareTo(@NotNull FormattableMessage formattableMessage)
     {
