@@ -38,6 +38,11 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
 
     public void initializeStorage()
     {
+        this.initializeStorage(false);
+    }
+
+    public void initializeStorage(boolean noReload)
+    {
         try
         {
             //初始化配置文件
@@ -63,7 +68,9 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
             t.printStackTrace();
         }
 
-        reloadConfiguration();
+        if (!noReload)
+            reloadConfiguration();
+
         storageInitialized = true;
     }
 
@@ -90,6 +97,9 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
         //加载JSON配置
         Object targetStore = null;
         var success = false;
+
+        if (!configurationFile.exists())
+            initializeStorage(true);
 
         //从文件读取并反序列化为配置
         try (var jsonStream = new InputStreamReader(new FileInputStream(configurationFile)))
