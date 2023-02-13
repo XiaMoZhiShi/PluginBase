@@ -10,6 +10,11 @@ public interface IPluginCommand extends CommandExecutor
 {
     public String getCommandName();
 
+    default List<String> getAliases()
+    {
+        return List.of();
+    }
+
     public default List<String> onTabComplete(List<String> args, CommandSender source)
     {
         return null;

@@ -74,7 +74,9 @@ public abstract class CommandHelper<P extends XiaMoJavaPlugin> extends PluginObj
 
         for (var c : getCommands())
         {
-            if (c.getCommandName().equals(baseName))
+            boolean cmdMatch = c.getCommandName().equals(baseName) || c.getAliases().contains(baseName);
+
+            if (cmdMatch)
             {
                 var result = c.onTabComplete(args, source);
                 return result == null ? emptyStringList : result;
