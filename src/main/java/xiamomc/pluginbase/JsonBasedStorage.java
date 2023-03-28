@@ -107,10 +107,10 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
             targetStore = gson.fromJson(jsonStream, storingObject.getClass());
             success = true;
         }
-        catch (Exception e)
+        catch (Throwable t)
         {
-            logger.warn("无法加载" + getDisplayName() + "的JSON配置：" + e.getMessage());
-            e.printStackTrace();
+            logger.warn("无法加载" + getDisplayName() + "的JSON配置：" + t.getMessage());
+            t.printStackTrace();
         }
 
         //确保targetStore不是null
@@ -141,9 +141,10 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
                 stream.write(jsonString.getBytes());
             }
         }
-        catch (Exception e)
+        catch (Throwable t)
         {
-            throw new RuntimeException(e);
+            logger.error("无法保存%s的配置: %s".formatted(this.getDisplayName(), t.getMessage()));
+            throw new RuntimeException(t);
         }
 
         return true;

@@ -89,10 +89,10 @@ public abstract class MessageStore<T extends XiaMoJavaPlugin> extends JsonBasedS
                 }
             }
         }
-        catch (Exception e)
+        catch (Throwable t)
         {
-            logger.warn(e.getMessage());
-            e.printStackTrace();
+            logger.warn(t.getMessage());
+            t.printStackTrace();
         }
     }
 }

@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Managers.DependencyManager;
@@ -119,14 +120,14 @@ public class FormattableMessage implements Comparable<FormattableMessage>
         return this;
     }
 
-    private MessageStore<?> store;
+    private MessageStore<?> cachedStore;
 
-    private MessageStore<?> getStore()
+    private MessageStore<?> getCachedStore()
     {
-        if (store == null)
-            store = depManager.get(MessageStore.class);
+        if (cachedStore == null)
+            cachedStore = depManager.get(MessageStore.class);
 
-        return store;
+        return cachedStore;
     };
 
     /**
@@ -161,7 +162,7 @@ public class FormattableMessage implements Comparable<FormattableMessage>
      */
     public Component toComponent(@Nullable String locale)
     {
-        return toComponent(locale, getStore());
+        return toComponent(locale, getCachedStore());
     }
 
     /**
@@ -170,7 +171,29 @@ public class FormattableMessage implements Comparable<FormattableMessage>
      */
     public Component toComponent()
     {
-        return toComponent(null, getStore());
+        return toComponent(null, getCachedStore());
+    }
+
+    private static final PlainTextComponentSerializer plainTextComponentSerializer = PlainTextComponentSerializer.plainText();
+
+    public String toString()
+    {
+        return plainTextComponentSerializer.serialize(toComponent());
+    }
+
+    public String toString(@Nullable String locale)
+    {
+        return plainTextComponentSerializer.serialize(toComponent(locale));
+    }
+
+    public String toString(@Nullable String locale, Class<? extends MessageStore<?>> depClass)
+    {
+        return plainTextComponentSerializer.serialize(toComponent(locale, depClass));
+    }
+
+    public String toString(@Nullable String locale, MessageStore<?> store)
+    {
+        return plainTextComponentSerializer.serialize(toComponent(locale, store));
     }
 
     @Override

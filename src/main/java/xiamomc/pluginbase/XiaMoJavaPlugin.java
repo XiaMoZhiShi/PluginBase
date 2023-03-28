@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public abstract class XiaMoJavaPlugin extends JavaPlugin
@@ -130,24 +131,22 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
         {
             c.Function.run();
         }
-        catch (Exception e)
+        catch (Throwable t)
         {
-            this.onExceptionCaught(e, c);
+            this.onExceptionCaught(t, c);
         }
     }
 
     //region tick异常捕捉与处理
 
-    //5 ticks内最多能接受多少异常
-    protected final int exceptionLimit = 5;
-
     protected int getExceptionLimit()
     {
-        return exceptionLimit;
+        //5 ticks内最多能接受多少异常
+        return 5;
     }
 
     //已经捕获的异常
-    private int exceptionCaught = 0;
+    private final AtomicInteger exceptionCaught = new AtomicInteger(0);
 
     /**
      * Should we cancel executing schedules?
@@ -159,16 +158,20 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
      */
     private boolean acceptSchedules = true;
 
-    private synchronized void onExceptionCaught(Exception exception, ScheduleInfo scheduleInfo)
+    private void onExceptionCaught(Throwable exception, ScheduleInfo scheduleInfo)
     {
         if (exception == null) return;
 
-        exceptionCaught += 1;
+        int exceptions;
+        synchronized (exceptionCaught)
+        {
+            exceptions = exceptionCaught.incrementAndGet();
+        }
 
         logger.warn("执行" + scheduleInfo + "时捕获到未处理的异常：");
         exception.printStackTrace();
 
-        if (exceptionCaught >= getExceptionLimit())
+        if (exceptions >= getExceptionLimit())
         {
             logger.error("可接受异常已到达最大限制: " + exceptionCaught + " -> " + getExceptionLimit());
 
@@ -179,7 +182,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
     private void processExceptionCount()
     {
-        exceptionCaught -= 1;
+        exceptionCaught.decrementAndGet();
 
         this.schedule(this::processExceptionCount, 5);
     }
