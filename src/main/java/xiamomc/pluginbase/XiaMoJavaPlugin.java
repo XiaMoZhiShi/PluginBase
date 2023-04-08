@@ -7,14 +7,13 @@ import org.slf4j.Logger;
 import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.Utilities.PluginSoftDependManager;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-public abstract class XiaMoJavaPlugin extends JavaPlugin
+public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulablePlugin
 {
     private static final Map<String, XiaMoJavaPlugin> instances = new ConcurrentHashMap<>();
 
@@ -66,9 +65,21 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
         this.cancelSchedules = false;
         this.acceptSchedules = true;
 
-        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, this::tick, 0, 1);
+        startMainLoop(this::tick);
 
         super.onEnable();
+    }
+
+    @Override
+    public void startMainLoop(Runnable r)
+    {
+        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, r, 0, 1);
+    }
+
+    @Override
+    public void runAsync(Runnable r)
+    {
+        getServer().getScheduler().runTaskAsynchronously(this, r);
     }
 
     @Override
@@ -90,14 +101,16 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
     private long currentTick = 0;
 
+    private final List<ScheduleInfo> schedulesTemp = new ObjectArrayList<>();
+
     private void tick()
     {
         currentTick += 1;
 
         if (cancelSchedules) return;
 
-        var schedules = new ArrayList<>(this.schedules);
-        schedules.forEach(c ->
+        schedulesTemp.addAll(this.schedules);
+        schedulesTemp.forEach(c ->
         {
             if (c.isCanceled())
             {
@@ -114,13 +127,13 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin
 
                 //logger.info("执行：" + c + "，当前TICK：" + currentTick);\
                 if (c.isAsync)
-                    getServer().getScheduler().runTaskAsynchronously(this, r -> runFunction(c));
+                    runAsync(() -> runFunction(c));
                 else
                     runFunction(c);
             }
         });
 
-        schedules.clear();
+        schedulesTemp.clear();
     }
 
     private void runFunction(ScheduleInfo c)
