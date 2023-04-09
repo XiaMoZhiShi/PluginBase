@@ -171,6 +171,12 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
      */
     private boolean acceptSchedules = true;
 
+    @Override
+    public boolean acceptSchedules()
+    {
+        return acceptSchedules;
+    }
+
     private void onExceptionCaught(Throwable exception, ScheduleInfo scheduleInfo)
     {
         if (exception == null) return;
