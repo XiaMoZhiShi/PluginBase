@@ -195,7 +195,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
             logger.error("可接受异常已到达最大限制: " + exceptionCaught + " -> " + getExceptionLimit());
 
             this.schedules.clear();
-            this.setEnabled(false);
+            Bukkit.getPluginManager().disablePlugin(this);
         }
     }
 
