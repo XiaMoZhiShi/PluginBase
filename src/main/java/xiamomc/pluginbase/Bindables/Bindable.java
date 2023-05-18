@@ -2,6 +2,7 @@ package xiamomc.pluginbase.Bindables;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.WeakReferenceList;
 
@@ -109,7 +110,7 @@ public class Bindable<T> implements IBindable<T>
 
     /**
      * 将此Bindable和另外一个Bindable绑定
-     * @apiNote 目前一旦绑定将不能解绑
+     * 如果此Bindable已经绑定了一个对象，那么将从上一个对象处解绑
      *
      * @param other 目标Bindable
      */
@@ -118,10 +119,7 @@ public class Bindable<T> implements IBindable<T>
         if (other == null || other == this || binds.contains(other.weakRef)) return;
 
         if (bindTarget != null)
-        {
-            this.binds.remove(bindTarget.weakRef);
-            bindTarget.binds.remove(weakRef);
-        }
+            unBindFrom(bindTarget);
 
         //让other改变值时可以触发这里的triggerValueChange
         other.binds.add(weakRef);
@@ -135,12 +133,59 @@ public class Bindable<T> implements IBindable<T>
 
     private final WeakReference<Bindable<T>> weakRef = new WeakReference<>(this);
 
-    public void bindTo(IBindable<T> other)
+    public void bindTo(@NotNull IBindable<T> other)
     {
         if (!(other instanceof Bindable<T> bindable))
             throw new IllegalArgumentException("指定的目标不是Bindable实例");
 
         this.bindTo(bindable);
+    }
+
+    public void unBindFrom(Bindable<T> other)
+    {
+        if (other == null || other == this) return;
+
+        if (bindTarget == null) return;
+
+        if (this.bindTarget != other)
+            throw new RuntimeException("Trying to unbind from a target that were not bind to: %s"
+                    .formatted(toStringSuper(), other.toStringSuper()));
+
+        bindTarget.binds.remove(weakRef);
+        this.binds.remove(bindTarget.weakRef);
+
+        this.bindTarget = null;
+    }
+
+    /**
+     * 移除所有通过 {@link Bindable#onValueChanged(BiConsumer)} 添加的Consumer
+     */
+    public void unBindListeners()
+    {
+        valueChangeConsumers.clear();
+    }
+
+    /**
+     * 移除所有绑定到此Bindable的对象
+     */
+    public void unBindBindings()
+    {
+        for (Bindable<T> bind : this.binds)
+            bind.unBindFrom(this);
+    }
+
+    /**
+     * 移除所有通过 {@link Bindable#onValueChanged(BiConsumer)} 添加的Consumer，
+     * 解除所有绑定到此Bindable的对象，
+     * 并解除自身的绑定（如果有）
+     */
+    public void unBindAll()
+    {
+        unBindBindings();
+        unBindListeners();
+
+        if (bindTarget != null)
+            unBindFrom(bindTarget);
     }
 
     private final List<BiConsumer<T, T>> valueChangeConsumers = new ObjectArrayList<>();
@@ -170,8 +215,19 @@ public class Bindable<T> implements IBindable<T>
             consumer.accept(null, value);
     }
 
+    public void dispose()
+    {
+        this.unBindAll();
+    }
+
     @Override
-    public String toString() {
+    public String toString()
+    {
         return "" + value;
+    }
+
+    private String toStringSuper()
+    {
+        return super.toString();
     }
 }

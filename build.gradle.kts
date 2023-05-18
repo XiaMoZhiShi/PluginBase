@@ -29,7 +29,7 @@ dependencies {
 }
 
 group = "com.github.XiaMoZhiShi"
-version = "0.0.28-alpha"
+version = "0.0.30"
 description = "Pluginbase"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
