@@ -6,13 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xiamomc.pluginbase.Annotations.NotSerializable;
 import xiamomc.pluginbase.Annotations.Serializable;
-import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ConfigSerializeUtils
@@ -137,5 +134,24 @@ public class ConfigSerializeUtils
         {
             super(s);
         }
+    }
+
+    public static Number convertNumber(Class<?> type, Number input, boolean nullIfFailed)
+    {
+        //System.out.println("Input type: %s, From value: %s(%s)".formatted(type, input, input.getClass()));
+        if (type == Integer.class || type == int.class)
+            return input.intValue();
+        else if (type == Float.class || type == float.class)
+            return input.floatValue();
+        else if (type == Double.class || type == double.class)
+            return input.doubleValue();
+        else if (type == Long.class || type == long.class)
+            return input.longValue();
+        else if (type == Short.class || type == short.class)
+            return input.shortValue();
+
+        if (nullIfFailed) return null;
+
+        throw new RuntimeException("Unable to convert input ('%s') to the target type: %s".formatted(input, type));
     }
 }

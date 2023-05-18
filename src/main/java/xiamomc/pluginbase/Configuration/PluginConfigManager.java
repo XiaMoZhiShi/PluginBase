@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xiamomc.pluginbase.Utilities.ConfigSerializeUtils;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.ArrayList;
@@ -40,7 +41,16 @@ public class PluginConfigManager implements IConfigManager
         //检查是否可以cast过去
         if (!type.isAssignableFrom(value.getClass()))
         {
-            plugin.getSLF4JLogger().warn("未能将处于" + node + "的配置转换为" + type.getSimpleName());
+            var numClass = Number.class;
+            if (numClass.isAssignableFrom(type) && value instanceof Number numVal)
+            {
+                var num = ConfigSerializeUtils.convertNumber(type, numVal, true);
+                if (num != null) return (T) num;
+            }
+
+            plugin.getSLF4JLogger().warn("Unable to convert value under node '%s' from '%s' to '%s'"
+                    .formatted(node, value.getClass().getSimpleName(), type.getSimpleName()));
+
             return null;
         }
 
