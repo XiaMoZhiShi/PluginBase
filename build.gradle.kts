@@ -39,6 +39,10 @@ publishing {
     }
 }
 
+tasks.build {
+    dependsOn(tasks.reobfJar)
+}
+
 tasks.withType<JavaCompile>() {
     options.encoding = "UTF-8"
 }
