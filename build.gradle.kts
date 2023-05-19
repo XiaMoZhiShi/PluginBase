@@ -24,8 +24,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:${project.property("minecraft_version")}")
-    paperDevBundle("${project.property("minecraft_version")}")
+    paperweight.paperDevBundle("${project.property("minecraft_version")}")
 }
 
 group = "com.github.XiaMoZhiShi"
@@ -39,7 +38,11 @@ publishing {
     }
 }
 
-tasks.build {
+tasks.publish {
+    dependsOn(tasks.reobfJar)
+}
+
+tasks.assemble {
     dependsOn(tasks.reobfJar)
 }
 
