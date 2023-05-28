@@ -13,11 +13,11 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
-          cache: 'gradle'
-      - name: Build with Gradle
-        run: ./gradlew build
+          cache: 'maven'
+      - name: Build with Maven
+        run: mvn build install
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: Artifact
-          path: build/libs/*.jar
+          path: target/PluginBase-*.jar

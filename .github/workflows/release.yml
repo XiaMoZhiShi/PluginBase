@@ -16,11 +16,11 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
-          cache: 'gradle'
-      - name: Build with Gradle
-        run: ./gradlew build
+          cache: 'maven'
+      - name: Build with Maven
+        run: mvn build install
       - name: Upload artifact
-        uses: AButler/upload-release-assets@v2.0
+        uses: actions/upload-artifact@v2
         with:
-          files: 'build/libs/*.jar'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          name: Artifact
+          path: target/PluginBase-*.jar
