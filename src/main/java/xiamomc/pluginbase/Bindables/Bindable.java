@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.WeakReferenceList;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -88,6 +89,24 @@ public class Bindable<T> implements IBindable<T>
     public void setInternal(Object val)
     {
         set((T) val);
+    }
+
+    @ApiStatus.Internal
+    @Nullable
+    public T tryCast(Object val)
+    {
+        try
+        {
+            //var typeParam = Arrays.stream(this.getClass().getTypeParameters())
+            //        .findFirst().orElseThrow();
+
+            //var typeParamClazz = (Class<T>) typeParam.getGenericDeclaration().componentType();
+            return (T) val;
+        }
+        catch (Throwable t)
+        {
+            return null;
+        }
     }
 
     /**

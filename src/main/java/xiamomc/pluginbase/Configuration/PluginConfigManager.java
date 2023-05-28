@@ -174,11 +174,16 @@ public class PluginConfigManager implements IConfigManager
         {
             try
             {
-                bindable.setInternal(backendConfig.get(str));
+                var valRaw = backendConfig.get(str);
+
+                if (valRaw instanceof Number numVal)
+                    ConfigSerializeUtils.tryCastNumberBindable(bindable, numVal);
+                else
+                    bindable.setInternal(bindable.tryCast(valRaw));
             }
             catch (Throwable t)
             {
-                logger.warn("无法为" + str + "的Bindable设置值：" + t.getMessage());
+                logger.warn("Unable to set value for Bindable bind to config node %s: %s".formatted(str, t.getMessage()));
                 t.printStackTrace();
             }
         });

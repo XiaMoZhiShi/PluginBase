@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xiamomc.pluginbase.Annotations.NotSerializable;
 import xiamomc.pluginbase.Annotations.Serializable;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -136,6 +137,44 @@ public class ConfigSerializeUtils
         }
     }
 
+    /**
+     *
+     * @param bindable
+     * @param val
+     * @return Whether the operation was successful
+     */
+    public static boolean tryCastNumberBindable(Bindable<?> bindable, Number val)
+    {
+        try
+        {
+            //if (!(val instanceof Number numVal)) return false;
+
+            var typeParam = Arrays.stream(bindable.getClass().getTypeParameters())
+                    .findFirst().orElseThrow();
+
+            var typeParamClazz = typeParam.getGenericDeclaration().componentType();
+            var numConv = convertNumber(typeParamClazz, val, true);
+            if (numConv == null) return false;
+
+            bindable.setInternal(numConv);
+            return true;
+        }
+        catch (Throwable t)
+        {
+            Logger.warn("Unable to cast value for Bindable: %s".formatted(t.getMessage()));
+            t.printStackTrace();
+        }
+
+        return false;
+    }
+
+    /**
+     * Convert the input value to the target type
+     * @param type The target type
+     * @param input A valid Number instance
+     * @param nullIfFailed Should we return null if not convertable?
+     * @return A number that converts from the giving inputs
+     */
     public static Number convertNumber(Class<?> type, Number input, boolean nullIfFailed)
     {
         //System.out.println("Input type: %s, From value: %s(%s)".formatted(type, input, input.getClass()));
