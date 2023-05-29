@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -49,12 +50,6 @@ public class PluginSoftDependManager implements Listener
     public PluginSoftDependManager(XiaMoJavaPlugin plugin)
     {
         registerPluginInstance(plugin);
-
-        plugin.schedule(() ->
-        {
-            for (Plugin pl : Bukkit.getPluginManager().getPlugins())
-                this.onEnable(pl.getName());
-        });
     }
 
     public void registerPluginInstance(XiaMoJavaPlugin plugin)
@@ -71,39 +66,66 @@ public class PluginSoftDependManager implements Listener
     }
     //endregion 实例相关
 
-    private final Map<String, Consumer<?>> onEnableStrToConsumerMap = new Object2ObjectOpenHashMap<>();
-    private final Map<String, Consumer<?>> onDisableStrToConsumerMap = new Object2ObjectOpenHashMap<>();
+    private final Map<String, Consumer<Plugin>> onEnableStrToConsumerMap = new Object2ObjectOpenHashMap<>();
+    private final Map<String, Consumer<Plugin>> onDisableStrToConsumerMap = new Object2ObjectOpenHashMap<>();
 
-    public void setHandle(String id, Consumer<?> onEnable)
+    public void setHandle(String id, Consumer<Plugin> onEnable, boolean runOnce)
     {
-        this.setHandle(id, onEnable, null);
+        this.setHandle(id, onEnable, null, runOnce);
     }
 
-    public void setHandle(String id, Consumer<?> onEnable, @Nullable Consumer<?> onDisable)
+    public void setHandle(String id, Consumer<Plugin> onEnable)
     {
+        this.setHandle(id, onEnable, null, false);
+    }
+
+    public void setHandle(String id, Consumer<Plugin> onEnable, @Nullable Consumer<Plugin> onDisable, boolean runOnce)
+    {
+        var plugins = runOnce ? Bukkit.getPluginManager().getPlugins() : new Plugin[]{};
         if (onEnable == null)
             this.onEnableStrToConsumerMap.remove(id);
         else
+        {
             this.onEnableStrToConsumerMap.put(id, onEnable);
 
+            if (runOnce)
+            {
+                var plugin = Arrays.stream(plugins).filter(p -> p.getName().equals(id)).findFirst().orElse(null);
+
+                if (plugin != null && plugin.isEnabled())
+                    onEnable.accept(plugin);
+            }
+        }
+
         if (onDisable == null)
-            this.onEnableStrToConsumerMap.remove(id);
+            this.onDisableStrToConsumerMap.remove(id);
         else
+        {
             this.onDisableStrToConsumerMap.put(id, onDisable);
+
+            if (runOnce)
+            {
+                var plugin = Arrays.stream(plugins).filter(p -> p.getName().equals(id)).findFirst().orElse(null);
+
+                if (plugin != null && !plugin.isEnabled())
+                    onDisable.accept(plugin);
+            }
+        }
     }
 
     @EventHandler
     public void onPluginEnable(PluginEnableEvent e)
     {
-        this.onEnable(e.getPlugin().getName());
+        this.onEnable(e.getPlugin());
     }
 
-    private void onEnable(String name)
+    private void onEnable(Plugin plugin)
     {
+        var name = plugin.getName();
         var consumer = onEnableStrToConsumerMap.getOrDefault(name, null);
 
         if (consumer != null)
-            consumer.accept(null);
+            consumer.accept(plugin);
     }
 
     @EventHandler
