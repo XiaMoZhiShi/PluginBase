@@ -149,12 +149,23 @@ public class ConfigSerializeUtils
         {
             //if (!(val instanceof Number numVal)) return false;
 
-            var typeParam = Arrays.stream(bindable.getClass().getTypeParameters())
-                    .findFirst().orElseThrow();
+            var bindableVal = bindable.get();
+            if (bindableVal == null)
+            {
+                Logger.error("Bindable %s has a null value and cannot be used for number converting");
+                return false;
+            }
 
-            var typeParamClazz = typeParam.getGenericDeclaration().componentType();
+            var typeParamClazz = bindableVal.getClass();
+
             var numConv = convertNumber(typeParamClazz, val, true);
-            if (numConv == null) return false;
+            if (numConv == null)
+            {
+                Logger.error("Cannot convert input %s(%s) to a compat value for target bindable %s(%s)"
+                        .formatted(val, val.getClass(), bindable, bindable));
+
+                return false;
+            }
 
             bindable.setInternal(numConv);
             return true;

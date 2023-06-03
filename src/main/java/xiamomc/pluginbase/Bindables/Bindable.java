@@ -242,7 +242,7 @@ public class Bindable<T> implements IBindable<T>
     @Override
     public String toString()
     {
-        return "" + value;
+        return "%s(%s)".formatted(value, toStringSuper());
     }
 
     private String toStringSuper()
