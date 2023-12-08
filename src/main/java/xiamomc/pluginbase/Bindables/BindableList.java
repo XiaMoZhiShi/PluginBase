@@ -1,6 +1,7 @@
 package xiamomc.pluginbase.Bindables;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.WeakReferenceList;
 
@@ -182,10 +183,16 @@ public class BindableList<T> implements IBindableList<T>
 
     public boolean add(T t)
     {
-        list.add(t);
+        var listChanged = list.add(t);
         this.triggerChange(t, TriggerReason.ADD);
 
-        return true;
+        return listChanged;
+    }
+
+    @ApiStatus.Internal
+    public boolean addInternal(Object val)
+    {
+        return add((T)val);
     }
 
     public T remove(int i)
@@ -200,12 +207,19 @@ public class BindableList<T> implements IBindableList<T>
 
     public boolean remove(Object o)
     {
-        var success = list.remove(o);
+        var listChanged = list.remove(o);
 
-        if (success)
+        if (listChanged)
             this.triggerChange((T) o, TriggerReason.REMOVE);
 
-        return success;
+        return listChanged;
+    }
+
+    @ApiStatus.Internal
+    public boolean addAllInternal(@NotNull Collection<?> collection)
+    {
+        var cast = (Collection<T>) collection;
+        return addAll(cast);
     }
 
     public boolean addAll(@NotNull Collection<? extends T> collection)
