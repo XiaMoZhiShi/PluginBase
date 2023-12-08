@@ -110,6 +110,9 @@ public class BindableList<T> implements IBindableList<T>
             list.addAll(changes);
         else
             list.removeAll(changes);
+
+        var diffList = changes.stream().toList();
+        consumers.forEach(c -> c.accept(diffList, operation));
     }
 
     final WeakReferenceList<BindableList<T>> binds = new WeakReferenceList<>();
