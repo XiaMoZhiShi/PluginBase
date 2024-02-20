@@ -85,6 +85,18 @@ public class FormattableMessage implements Comparable<FormattableMessage>
         return this;
     }
 
+    public FormattableMessage resolve(String target, Object obj)
+    {
+        var str = "Nil";
+
+        if (obj != null)
+            str = obj.toString();
+
+        resolve(target, str);
+
+        return this;
+    }
+
     /**
      * 添加解析
      * @param target 要解析的Key
