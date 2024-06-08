@@ -43,6 +43,7 @@ public abstract class CommandHelper<P extends XiaMoJavaPlugin> extends PluginObj
         if (cmd != null && cmd.getExecutor().equals(getPlugin()))
         {
             cmd.setExecutor(command);
+            cmd.setTabCompleter(command);
             return true;
         }
         else
