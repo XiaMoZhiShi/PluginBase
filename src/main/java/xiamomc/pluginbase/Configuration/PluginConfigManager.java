@@ -11,10 +11,7 @@ import xiamomc.pluginbase.Bindables.BindableList;
 import xiamomc.pluginbase.Utilities.ConfigSerializeUtils;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class PluginConfigManager implements IConfigManager
@@ -32,9 +29,9 @@ public class PluginConfigManager implements IConfigManager
 
     //region get and get bindable methods
 
-    public <T> T get(Class<T> type, ConfigOption<T> option)
+    public <T> T get(ConfigOption<T> option)
     {
-        return get(type, option.node());
+        return get((Class<? extends T>) option.getDefault().getClass(), option.node());
     }
 
     @Override
@@ -80,9 +77,9 @@ public class PluginConfigManager implements IConfigManager
         return val;
     }
 
-    public <T> T getOrDefault(Class<T> type, ConfigOption<T> option)
+    public <T> T getOrDefault(ConfigOption<T> option)
     {
-        var val = get(type, option);
+        var val = get(option);
 
         if (val == null)
         {
@@ -94,9 +91,9 @@ public class PluginConfigManager implements IConfigManager
         return val;
     }
 
-    public <T> T getOrDefault(Class<T> type, ConfigOption<T> option, @Nullable T defaultValue)
+    public <T> T getOrDefault(ConfigOption<T> option, @Nullable T defaultValue)
     {
-        var val = get(type, option);
+        var val = get(option);
 
         if (val == null)
         {
@@ -138,14 +135,14 @@ public class PluginConfigManager implements IConfigManager
         return getBindable(type, path, null);
     }
 
-    public <T> Bindable<T> getBindable(Class<T> type, ConfigOption<T> path, T defaultValue)
+    public <T> Bindable<T> getBindable(ConfigOption<T> option)
     {
-        return getBindable(type, path.node(), defaultValue);
+        return getBindable(option, option.getDefault());
     }
 
-    public <T> Bindable<T> getBindable(Class<T> type, ConfigOption<T> option)
+    public <T> Bindable<T> getBindable(ConfigOption<T> path, T defaultValue)
     {
-        return getBindable(type, option, option.getDefault());
+        return getBindable((Class<T>) path.getDefault().getClass(), path.node(), defaultValue);
     }
 
     private Map<String, BindableList<?>> bindableLists;
@@ -156,20 +153,22 @@ public class PluginConfigManager implements IConfigManager
             bindableLists = new Object2ObjectOpenHashMap<>();
     }
 
-    public <T> BindableList<T> getBindableList(Class<T> clazz, ConfigOption option)
+    public <T> BindableList<T> getBindableList(ConfigOption<List<T>> option)
     {
         ensureBindableListNotNull();
 
+        Class<?> clazz = option.getDefault().getClass();
+
         //System.out.println("GET LIST " + option.toString());
 
-        var val = bindableLists.getOrDefault(option.toString(), null);
+        var val = bindableLists.getOrDefault(option.node().toString(), null);
         if (val != null)
         {
             //System.out.println("FIND EXISTING LIST, RETURNING " + val);
             return (BindableList<T>) val;
         }
 
-        List<?> originalList = backendConfig.getList(option.toString(), new ArrayList<T>());
+        List<?> originalList = backendConfig.getList(option.node().toString(), new ArrayList<T>());
         originalList.removeIf(listVal -> !clazz.isInstance(listVal)); //Don't work for somehow
 
         var list = new BindableList<T>();
@@ -182,7 +181,7 @@ public class PluginConfigManager implements IConfigManager
             save();
         }, true);
 
-        bindableLists.put(option.toString(), list);
+        bindableLists.put(option.node().toString(), list);
 
         //System.out.println("RETURN " + list);
 
@@ -200,19 +199,19 @@ public class PluginConfigManager implements IConfigManager
         bindable.bindTo(bb);
     }
 
-    public <T> void bind(Bindable<T> bindable, ConfigOption option)
+    public <T> void bind(Bindable<T> bindable, ConfigOption<T> option)
     {
-        var bb = this.getBindable(option.getDefault().getClass(), option);
+        var bb = this.getBindable(option);
 
         if (bindable.getClass().isInstance(bb))
-            bindable.bindTo((Bindable<T>) bb);
+            bindable.bindTo(bb);
         else
             throw new IllegalArgumentException("尝试将一个Bindable绑定在不兼容的配置(" + option + ")上");
     }
 
-    public <T> void bind(Class<T> clazz, BindableList<T> bindable, ConfigOption option)
+    public <T> void bind(BindableList<T> bindable, ConfigOption<List<T>> option)
     {
-        var bb = this.getBindableList(clazz, option);
+        var bb = this.getBindableList(option);
 
         if (bindable.getClass().isInstance(bb))
             bindable.bindTo(bb);

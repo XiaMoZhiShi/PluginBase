@@ -1,6 +1,7 @@
 package xiamomc.pluginbase.Configuration;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Function;
@@ -16,6 +17,7 @@ public class ConfigOption<T>
         return node;
     }
 
+    @NotNull
     public T getDefault()
     {
         return defaultValueFunc.apply(null);
@@ -48,6 +50,12 @@ public class ConfigOption<T>
     public boolean containsFlag(String flag)
     {
         return flags.stream().anyMatch(f -> f.equalsIgnoreCase(flag));
+    }
+
+    @Override
+    public String toString()
+    {
+        return node.toString();
     }
 
     //region Utilities
