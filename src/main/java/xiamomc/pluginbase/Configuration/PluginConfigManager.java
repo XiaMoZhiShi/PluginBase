@@ -31,13 +31,24 @@ public class PluginConfigManager implements IConfigManager
 
     public <T> T get(ConfigOption<T> option)
     {
-        return get((Class<? extends T>) option.getDefault().getClass(), option.node());
+        Class<?> clazz = option.getDefault().getClass();
+
+        if (option.getDefault() instanceof List<?>)
+            clazz = List.class;
+
+        return get((Class<? extends T>) clazz, option.node());
     }
 
     @Override
     @Nullable
     public <T> T get(Class<T> type, ConfigNode node)
     {
+        if (type == Object.class)
+        {
+            plugin.getSLF4JLogger().warn("[PluginBase] Trying to get an object instance from a node!");
+            Thread.dumpStack();
+        }
+
         var value = backendConfig.get(node.toString());
 
         if (value == null)
@@ -57,6 +68,8 @@ public class PluginConfigManager implements IConfigManager
 
             plugin.getSLF4JLogger().warn("Unable to convert value under node '%s' from '%s' to '%s'"
                     .formatted(node, value.getClass().getSimpleName(), type.getSimpleName()));
+
+            Thread.dumpStack();
 
             return null;
         }
