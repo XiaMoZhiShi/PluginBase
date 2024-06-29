@@ -1,6 +1,7 @@
 package xiamomc.pluginbase.Configuration;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +17,7 @@ import java.util.function.Consumer;
 
 public class PluginConfigManager implements IConfigManager
 {
+    private static final Logger logger = LoggerFactory.getLogger(PluginConfigManager.class);
     protected FileConfiguration backendConfig;
     protected final XiaMoJavaPlugin plugin;
 
@@ -45,7 +47,7 @@ public class PluginConfigManager implements IConfigManager
     {
         if (type == Object.class)
         {
-            plugin.getSLF4JLogger().warn("[PluginBase] Trying to get an object instance from a node!");
+            logger.warn("[PluginBase] Trying to get an object instance from a node!");
             Thread.dumpStack();
         }
 
@@ -66,7 +68,7 @@ public class PluginConfigManager implements IConfigManager
                 if (num != null) return (T) num;
             }
 
-            plugin.getSLF4JLogger().warn("Unable to convert value under node '%s' from '%s' to '%s'"
+            logger.warn("Unable to convert value under node '%s' from '%s' to '%s'"
                     .formatted(node, value.getClass().getSimpleName(), type.getSimpleName()));
 
             Thread.dumpStack();
@@ -166,15 +168,14 @@ public class PluginConfigManager implements IConfigManager
             bindableLists = new Object2ObjectOpenHashMap<>();
     }
 
-    public <T> BindableList<T> getBindableList(ConfigOption<List<T>> option)
+    public <T> BindableList<T> getBindableList(Class<T> elementClass, ConfigOption<List<T>> option)
     {
         ensureBindableListNotNull();
-
-        Class<?> clazz = option.getDefault().getClass();
 
         //System.out.println("GET LIST " + option.toString());
 
         var val = bindableLists.getOrDefault(option.node().toString(), null);
+        logger.warn("Rersult from cache: " +val);
         if (val != null)
         {
             //System.out.println("FIND EXISTING LIST, RETURNING " + val);
@@ -182,13 +183,21 @@ public class PluginConfigManager implements IConfigManager
         }
 
         List<?> originalList = backendConfig.getList(option.node().toString(), new ArrayList<T>());
-        originalList.removeIf(listVal -> !clazz.isInstance(listVal)); //Don't work for somehow
+        logger.warn("List contents: " + originalList);
+
+        originalList.removeIf(listVal ->
+        {
+            logger.warn("Clazz is " + elementClass + " nad instanec is "+ listVal.getClass());
+            return !elementClass.isInstance(listVal);
+        }); //Don't work for somehow
+        logger.warn("After remove");
 
         var list = new BindableList<T>();
         list.addAll((List<T>)originalList);
 
         list.onListChanged((diffList, reason) ->
         {
+            logger.warn("Change! diff is '%s' and reason is '%s'".formatted(diffList, reason));
             //System.out.println("LIST CHANGED: " + diffList + " WITH REASON " + reason);
             backendConfig.set(option.node().toString(), list);
             save();
@@ -222,9 +231,9 @@ public class PluginConfigManager implements IConfigManager
             throw new IllegalArgumentException("尝试将一个Bindable绑定在不兼容的配置(" + option + ")上");
     }
 
-    public <T> void bind(BindableList<T> bindable, ConfigOption<List<T>> option)
+    public <T> void bind(BindableList<T> bindable, ConfigOption<List<T>> option, Class<T> elementClass)
     {
-        var bb = this.getBindableList(option);
+        var bb = this.getBindableList(elementClass, option);
 
         if (bindable.getClass().isInstance(bb))
             bindable.bindTo(bb);
@@ -241,6 +250,9 @@ public class PluginConfigManager implements IConfigManager
         //spigot的配置管理器没有返回值
         backendConfig.set(node.toString(), value);
         save();
+
+        if (value instanceof List<?>)
+            Thread.dumpStack();
 
         if (!isInternal)
         {
@@ -305,8 +317,6 @@ public class PluginConfigManager implements IConfigManager
         // Ensure bindableLists is not null
         ensureBindableListNotNull();
 
-        var logger = plugin.getSLF4JLogger();
-
         // Update values
         stringConfigNodeMap.forEach((str, bindable) ->
         {
@@ -323,7 +333,7 @@ public class PluginConfigManager implements IConfigManager
             }
             catch (Throwable t)
             {
-                logger.warn("Unable to set value for Bindable bind to config node %s: %s".formatted(str, t.getMessage()));
+                logger.warn("[PluginBase] Unable to set value for Bindable bind to config node %s: %s".formatted(str, t.getMessage()));
                 t.printStackTrace();
             }
         });
@@ -333,10 +343,12 @@ public class PluginConfigManager implements IConfigManager
         {
             var configList = backendConfig.getList(node);
 
-            list.clear();
+            configList = configList == null
+                    ? new ObjectArrayList<>()
+                    : new ObjectArrayList<>(configList);
 
-            if (configList != null)
-                list.addAllInternal(configList);
+            list.clear();
+            list.addAllInternal(configList);
         });
 
         // Run all onRefresh hooks
