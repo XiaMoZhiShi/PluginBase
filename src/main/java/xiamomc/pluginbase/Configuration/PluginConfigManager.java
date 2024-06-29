@@ -175,7 +175,6 @@ public class PluginConfigManager implements IConfigManager
         //System.out.println("GET LIST " + option.toString());
 
         var val = bindableLists.getOrDefault(option.node().toString(), null);
-        logger.warn("Rersult from cache: " +val);
         if (val != null)
         {
             //System.out.println("FIND EXISTING LIST, RETURNING " + val);
@@ -183,21 +182,14 @@ public class PluginConfigManager implements IConfigManager
         }
 
         List<?> originalList = backendConfig.getList(option.node().toString(), new ArrayList<T>());
-        logger.warn("List contents: " + originalList);
 
-        originalList.removeIf(listVal ->
-        {
-            logger.warn("Clazz is " + elementClass + " nad instanec is "+ listVal.getClass());
-            return !elementClass.isInstance(listVal);
-        }); //Don't work for somehow
-        logger.warn("After remove");
+        originalList.removeIf(listVal -> !elementClass.isInstance(listVal)); //Don't work for somehow
 
         var list = new BindableList<T>();
         list.addAll((List<T>)originalList);
 
         list.onListChanged((diffList, reason) ->
         {
-            logger.warn("Change! diff is '%s' and reason is '%s'".formatted(diffList, reason));
             //System.out.println("LIST CHANGED: " + diffList + " WITH REASON " + reason);
             backendConfig.set(option.node().toString(), list);
             save();
