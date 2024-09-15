@@ -186,7 +186,7 @@ public class PluginConfigManager implements IConfigManager
         list.onListChanged((diffList, reason) ->
         {
             //System.out.println("LIST CHANGED: " + diffList + " WITH REASON " + reason);
-            backendConfig.set(option.node().toString(), list);
+            backendConfig.set(option.node().toString(), new ArrayList<>(list));
             save();
         }, true);
 
