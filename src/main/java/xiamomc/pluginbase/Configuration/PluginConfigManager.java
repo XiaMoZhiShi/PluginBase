@@ -46,17 +46,12 @@ public class PluginConfigManager implements IConfigManager
     public <T> T get(Class<T> type, ConfigNode node)
     {
         if (type == Object.class)
-        {
-            logger.warn("[PluginBase] Trying to get an object instance from a node!");
-            Thread.dumpStack();
-        }
+            logger.warn("[PluginBase] Trying to get an object instance from a node, this is bad!");
 
-        var value = backendConfig.get(node.toString());
+        var value = backendConfig.get(node.toString(), null);
 
         if (value == null)
-        {
             return null;
-        }
 
         //检查是否可以cast过去
         if (!type.isAssignableFrom(value.getClass()))
