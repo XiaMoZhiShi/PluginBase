@@ -128,7 +128,7 @@ public class PluginConfigManager implements IConfigManager
     @Override
     public <T> Bindable<T> getBindable(Class<T> type, ConfigNode path, T defaultValue)
     {
-        var bindable = stringConfigNodeMap.get(path.toString());
+        var bindable = stringConfigNodeMap.getOrDefault(path.toString(), null);
 
         if (bindable != null)
         {
@@ -243,9 +243,6 @@ public class PluginConfigManager implements IConfigManager
         backendConfig.set(node.toString(), value);
         save();
 
-        if (value instanceof List<?>)
-            Thread.dumpStack();
-
         if (!isInternal)
         {
             if (value != null)
@@ -255,8 +252,12 @@ public class PluginConfigManager implements IConfigManager
             }
             else
             {
-                var bindable = stringConfigNodeMap.get(node.toString());
-                bindable.set(null);
+                var bindable = stringConfigNodeMap.getOrDefault(node.toString(), null);
+
+                if (bindable != null)
+                    bindable.set(null);
+                else
+                    logger.warn("No bindable found for node '%s', is it still in the config file?".formatted(node));
             }
         }
 
