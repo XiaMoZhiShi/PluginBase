@@ -30,7 +30,7 @@ dependencies {
 group = "com.github.XiaMoZhiShi"
 version = "2024.916.0"
 description = "Pluginbase"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_21
 
 publishing {
     publications.create<MavenPublication>("maven") {

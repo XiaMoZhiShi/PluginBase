@@ -1,9 +1,11 @@
-package xiamomc.pluginbase;
+package xiamomc.pluginbase.storage;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.PluginObject;
+import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.io.*;
 import java.net.URI;
@@ -57,7 +59,7 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
 
                 if (!configurationFile.createNewFile())
                 {
-                    logger.error("未能创建文件，将不会加载" + getDisplayName() + "的JSON配置！");
+                    logger.error("Unable to create file '%s', not loading storage data!".formatted(getFileName()));
                     return;
                 }
             }
@@ -102,14 +104,14 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
             initializeStorage(true);
 
         //从文件读取并反序列化为配置
-        try (var jsonStream = new InputStreamReader(new FileInputStream(configurationFile)))
+        try (var fileStream = new FileInputStream(configurationFile); var jsonStream = new InputStreamReader(fileStream))
         {
             targetStore = gson.fromJson(jsonStream, storingObject.getClass());
             success = true;
         }
         catch (Throwable t)
         {
-            logger.warn("无法加载" + getDisplayName() + "的JSON配置：" + t.getMessage());
+            logger.warn("Can't load JSON configuration for " + getDisplayName() + ": " + t.getMessage());
             t.printStackTrace();
         }
 
@@ -132,7 +134,7 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
 
             if (!configurationFile.createNewFile())
             {
-                logger.error("未能创建文件，将不会保存" + getDisplayName() + "的配置！");
+                logger.error("Unable to create file, no saving configuration for '%s'!".formatted(getDisplayName()));
                 return false;
             }
 
@@ -143,7 +145,7 @@ public abstract class JsonBasedStorage<T, P extends XiaMoJavaPlugin> extends Plu
         }
         catch (Throwable t)
         {
-            logger.error("无法保存%s的配置: %s".formatted(this.getDisplayName(), t.getMessage()));
+            logger.error("Unable to save configuration for %s: %s".formatted(this.getDisplayName(), t.getMessage()));
             throw new RuntimeException(t);
         }
 

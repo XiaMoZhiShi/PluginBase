@@ -28,7 +28,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
         return instances.get(nameSpace);
     }
 
-    public abstract String getNameSpace();
+    public abstract String getNamespace();
 
     protected final DependencyManager dependencyManager;
 
@@ -41,11 +41,15 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
         dependencyManager = DependencyManager.getManagerOrCreate(this);
         softDeps = PluginSoftDependManager.getManagerOrCreate(this);
 
-        instances.put(getNameSpace(), this);
+        instances.put(getNamespace(), this);
+    }
+
+    protected void enable()
+    {
     }
 
     @Override
-    public void onEnable()
+    public final void onEnable()
     {
         //region 注册依赖
         dependencyManager.unRegisterPluginInstance(this);
@@ -68,23 +72,20 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
         startMainLoop(this::tick);
 
         super.onEnable();
+        this.enable();
+    }
+
+    public abstract void startMainLoop(Runnable r);
+    public abstract void runAsync(Runnable r);
+
+    protected void disable()
+    {
     }
 
     @Override
-    public void startMainLoop(Runnable r)
+    public final void onDisable()
     {
-        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, r, 0, 1);
-    }
-
-    @Override
-    public void runAsync(Runnable r)
-    {
-        getServer().getScheduler().runTaskAsynchronously(this, r);
-    }
-
-    @Override
-    public void onDisable()
-    {
+        disable();
         super.onDisable();
 
         //禁止tick
@@ -103,7 +104,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
 
     private final List<ScheduleInfo> schedulesTemp = new ObjectArrayList<>();
 
-    private void tick()
+    protected void tick()
     {
         currentTick += 1;
 
@@ -136,7 +137,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
         schedulesTemp.clear();
     }
 
-    private void runFunction(ScheduleInfo c)
+    protected void runFunction(ScheduleInfo c)
     {
         if (cancelSchedules) return;
 
@@ -146,7 +147,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
         }
         catch (Throwable t)
         {
-            this.onExceptionCaught(t, c);
+            this.onTaskExceptionCaught(t, c);
         }
     }
 
@@ -164,12 +165,12 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
     /**
      * Should we cancel executing schedules?
      */
-    private boolean cancelSchedules = false;
+    protected boolean cancelSchedules = false;
 
     /**
      * Should we accept any further {@link XiaMoJavaPlugin#schedule} calls?
      */
-    private boolean acceptSchedules = true;
+    protected boolean acceptSchedules = true;
 
     @Override
     public boolean acceptSchedules()
@@ -177,7 +178,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
         return acceptSchedules;
     }
 
-    private void onExceptionCaught(Throwable exception, ScheduleInfo scheduleInfo)
+    protected void onTaskExceptionCaught(Throwable exception, ScheduleInfo scheduleInfo)
     {
         if (exception == null) return;
 

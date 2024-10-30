@@ -25,10 +25,10 @@ public interface IPluginCommand extends CommandExecutor, TabCompleter
         return null;
     }
 
-    public default String getPermissionRequirement()
-    {
-        return null;
-    }
+    /**
+     * @return NULL if no permission is required
+     */
+    public @Nullable String getPermissionRequirement();
 
     public FormattableMessage getHelpMessage();
 

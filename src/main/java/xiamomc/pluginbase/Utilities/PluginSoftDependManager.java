@@ -9,7 +9,6 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.Arrays;
@@ -38,7 +37,7 @@ public class PluginSoftDependManager implements Listener
     {
         if (pluginInstance == null) return null;
 
-        var depMgr = instances.get(pluginInstance.getNameSpace());
+        var depMgr = instances.get(pluginInstance.getNamespace());
         if (depMgr != null) return depMgr;
 
         depMgr = new PluginSoftDependManager(pluginInstance);
@@ -54,15 +53,15 @@ public class PluginSoftDependManager implements Listener
 
     public void registerPluginInstance(XiaMoJavaPlugin plugin)
     {
-        if (instances.containsKey(plugin.getNameSpace()))
+        if (instances.containsKey(plugin.getNamespace()))
             throw new RuntimeException("已经有一个SoftDependManager的实例了");
 
-        instances.put(plugin.getNameSpace(), this);
+        instances.put(plugin.getNamespace(), this);
     }
 
     public void unRegisterPluginInstance(XiaMoJavaPlugin plugin)
     {
-        instances.remove(plugin.getNameSpace());
+        instances.remove(plugin.getNamespace());
     }
     //endregion 实例相关
 

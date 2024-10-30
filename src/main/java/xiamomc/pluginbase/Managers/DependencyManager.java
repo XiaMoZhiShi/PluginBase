@@ -1,9 +1,7 @@
 package xiamomc.pluginbase.Managers;
 
-import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xiamomc.pluginbase.Exceptions.DependencyAlreadyRegistedException;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
@@ -39,7 +37,7 @@ public class DependencyManager
     {
         if (pluginInstance == null) return null;
 
-        var depMgr = instances.get(pluginInstance.getNameSpace());
+        var depMgr = instances.get(pluginInstance.getNamespace());
         if (depMgr != null) return depMgr;
 
         depMgr = new DependencyManager(pluginInstance);
@@ -59,18 +57,18 @@ public class DependencyManager
 
     public void registerPluginInstance(XiaMoJavaPlugin plugin)
     {
-        if (instances.containsKey(plugin.getNameSpace()))
+        if (instances.containsKey(plugin.getNamespace()))
         {
-            LoggerFactory.getLogger("XiaMoBase").warn("已经有一个 " + plugin.getNameSpace() + "的DependencyManager实例了");
+            LoggerFactory.getLogger("XiaMoBase").warn("已经有一个 " + plugin.getNamespace() + "的DependencyManager实例了");
             Thread.dumpStack();
         }
 
-        instances.put(plugin.getNameSpace(), this);
+        instances.put(plugin.getNamespace(), this);
     }
 
     public void unRegisterPluginInstance(XiaMoJavaPlugin plugin)
     {
-        instances.remove(plugin.getNameSpace());
+        instances.remove(plugin.getNamespace());
     }
     //endregion 实例相关
 

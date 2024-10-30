@@ -26,15 +26,6 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
 
     protected final Logger logger = plugin.getSLF4JLogger();
 
-    @Deprecated
-    protected final DependencyManager Dependencies = dependencies;
-
-    @Deprecated
-    protected final XiaMoJavaPlugin Plugin = plugin;
-
-    @Deprecated
-    protected final Logger Logger = logger;
-
     private List<Field> fieldsToResolve = new ObjectArrayList<>();
 
     private final List<Method> initializerMethods = new ObjectArrayList<>();

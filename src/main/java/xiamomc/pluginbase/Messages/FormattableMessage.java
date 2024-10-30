@@ -31,12 +31,12 @@ public class FormattableMessage implements Comparable<FormattableMessage>
 
     public FormattableMessage(@NotNull XiaMoJavaPlugin owningPlugin, @NotNull String key, @NotNull String defaultString)
     {
-        this(owningPlugin.getNameSpace(), key, defaultString);
+        this(owningPlugin.getNamespace(), key, defaultString);
     }
 
     public FormattableMessage(@NotNull XiaMoJavaPlugin owningPlugin, String value)
     {
-        this(owningPlugin.getNameSpace(), "_", value);
+        this(owningPlugin.getNamespace(), "_", value);
     }
 
     private final List<TagResolver> resolvers = new ObjectArrayList<>();

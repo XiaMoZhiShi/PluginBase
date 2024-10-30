@@ -3,7 +3,7 @@ package xiamomc.pluginbase.Messages;
 import it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.pluginbase.JsonBasedStorage;
+import xiamomc.pluginbase.storage.JsonBasedStorage;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.Arrays;
