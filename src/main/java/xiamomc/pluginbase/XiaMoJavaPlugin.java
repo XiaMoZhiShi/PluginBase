@@ -98,11 +98,11 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
         softDeps.unRegisterPluginInstance(this);
     }
 
+    public boolean doInternalDebugOutput = false;
+
     //region tick相关
 
-    private long currentTick = 0;
-
-    private final List<ScheduleInfo> schedulesTemp = new ObjectArrayList<>();
+    protected long currentTick = 0;
 
     protected void tick()
     {
@@ -110,9 +110,23 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
 
         if (cancelSchedules) return;
 
-        schedulesTemp.addAll(this.schedules);
+        var schedulesTemp = new ObjectArrayList<ScheduleInfo>();
+
+        synchronized (schedules)
+        {
+            schedulesTemp.addAll(this.schedules);
+        }
+
         schedulesTemp.forEach(c ->
         {
+            if (c == null)
+            {
+                if (doInternalDebugOutput)
+                    logger.warn("Trying to execute a NULL ScheduleInfo?! This shouldn't happen!");
+
+                return;
+            }
+
             if (c.isCanceled())
             {
                 this.schedules.remove(c);
@@ -211,7 +225,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
 
     //endregion tick相关
 
-    private final List<ScheduleInfo> schedules = new ObjectArrayList<>();
+    protected final List<ScheduleInfo> schedules = new ObjectArrayList<>();
 
     @Deprecated
     public ScheduleInfo schedule(Consumer<?> consumer)
