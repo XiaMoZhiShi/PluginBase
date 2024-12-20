@@ -51,6 +51,8 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
     @Override
     public final void onEnable()
     {
+        super.onEnable();
+
         //region 注册依赖
         dependencyManager.unRegisterPluginInstance(this);
         dependencyManager.registerPluginInstance(this);
@@ -69,10 +71,8 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
         this.cancelSchedules = false;
         this.acceptSchedules = true;
 
-        startMainLoop(this::tick);
-
-        super.onEnable();
         this.enable();
+        startMainLoop(this::tick);
     }
 
     public abstract void startMainLoop(Runnable r);
@@ -85,8 +85,8 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
     @Override
     public final void onDisable()
     {
-        disable();
         super.onDisable();
+        disable();
 
         //禁止tick
         this.cancelSchedules = true;
