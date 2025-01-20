@@ -110,10 +110,11 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
 
         if (cancelSchedules) return;
 
-        var schedulesTemp = new ObjectArrayList<ScheduleInfo>();
+        List<ScheduleInfo> schedulesTemp;
 
         synchronized (schedules)
         {
+            schedulesTemp = new ObjectArrayList<>(this.schedules.size());
             schedulesTemp.addAll(this.schedules);
         }
 
