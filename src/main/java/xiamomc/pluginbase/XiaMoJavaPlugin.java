@@ -114,9 +114,12 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
 
         synchronized (schedules)
         {
+            //logger.info(":: Schedule %s runnables...".formatted(this.schedules.size()));
             schedulesTemp = new ObjectArrayList<>(this.schedules.size());
             schedulesTemp.addAll(this.schedules);
         }
+
+        List<ScheduleInfo> toRemove = new ObjectArrayList<>();
 
         schedulesTemp.forEach(c ->
         {
@@ -130,13 +133,13 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
 
             if (c.isCanceled())
             {
-                this.schedules.remove(c);
+                toRemove.add(c);
                 return;
             }
 
             if (currentTick - c.TickScheduled >= c.Delay)
             {
-                this.schedules.remove(c);
+                toRemove.add(c);
 
                 //Allows us to cancel half-way
                 if (cancelSchedules) return;
@@ -149,7 +152,16 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
             }
         });
 
+        if (!toRemove.isEmpty())
+        {
+            synchronized (this.schedules)
+            {
+                this.schedules.removeAll(toRemove);
+            }
+        }
+
         schedulesTemp.clear();
+        //logger.info(":: End Schedule, toRemove is %s, final list %s, temp remaining %s".formatted(toRemove.size(), this.schedules.size(), schedulesTemp.size()));
     }
 
     protected void runFunction(ScheduleInfo c)
