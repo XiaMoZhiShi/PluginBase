@@ -1,6 +1,5 @@
 package xiamomc.pluginbase.Messages;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -11,7 +10,8 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FormattableMessage implements Comparable<FormattableMessage>
 {
@@ -39,8 +39,6 @@ public class FormattableMessage implements Comparable<FormattableMessage>
         this(owningPlugin.getNamespace(), "_", value);
     }
 
-    private final List<TagResolver> resolvers = new ObjectArrayList<>();
-
     /**
      * 获取消息的Key
      * @return 消息的key
@@ -59,76 +57,63 @@ public class FormattableMessage implements Comparable<FormattableMessage>
         return defaultString;
     }
 
-    /**
-     * 添加解析
-     * @param target 要解析的Key
-     * @param value 要解析的值
-     * @return 对此对象的引用
-     */
-    public FormattableMessage resolve(String target, String value)
+    @NotNull
+    private String priorityLocale = "";
+
+    @NotNull
+    public String getPriorityLocale()
     {
-        resolvers.add(Placeholder.parsed(target, value));
+        return priorityLocale;
+    }
+
+    public boolean hasPriorityLocale()
+    {
+        return !priorityLocale.isBlank();
+    }
+
+    public FormattableMessage preferredLocale(@Nullable String locale)
+    {
+        this.priorityLocale = locale == null ? "" : locale;
+        return this;
+    }
+
+    private final Map<String, IDynamicResolver> resolvers = new ConcurrentHashMap<>();
+
+    public FormattableMessage resolveIfNotSet(String key, IDynamicResolver resolver)
+    {
+        if (!resolvers.containsKey(key))
+            resolvers.put(key, resolver);
 
         return this;
     }
 
-    /**
-     * 添加解析
-     * @param target 要解析的Key
-     * @param value 要解析的值
-     * @return 对此对象的引用
-     */
-    public FormattableMessage resolve(String target, Component value)
+    public FormattableMessage resolve(String key, IDynamicResolver resolver)
     {
-        resolvers.add(Placeholder.component(target, value));
-
+        resolvers.put(key, resolver);
         return this;
     }
 
-    public FormattableMessage resolve(String target, Object obj)
+    public FormattableMessage resolve(String key, FormattableMessage other)
     {
-        var str = "Nil";
-
-        if (obj != null)
-            str = obj.toString();
-
-        resolve(target, str);
-
+        resolvers.put(key, other::createComponent);
         return this;
     }
 
-    /**
-     * 添加解析
-     * @param target 要解析的Key
-     * @param formattable 要解析的值
-     * @return 对此对象的引用
-     */
-    public FormattableMessage resolve(String target, FormattableMessage formattable, String locale)
+    public FormattableMessage resolve(String key, String plainText)
     {
-        if (locale == null) locale = this.locale;
-
-        resolvers.add(Placeholder.component(target, formattable.toComponent(locale)));
-
+        resolvers.put(key, locale -> Component.text(plainText));
         return this;
     }
 
-    public FormattableMessage resolve(String target, FormattableMessage formattableMessage)
+    public FormattableMessage resolve(String key, Component component)
     {
-        return this.resolve(target, formattableMessage, this.locale);
+        resolvers.put(key, locale -> component);
+        return this;
     }
 
-    private String locale = null;
-
-    @Nullable
-    public String getLocale()
+    public FormattableMessage resolve(String key, Object obj)
     {
-        return locale;
-    }
-
-    public FormattableMessage withLocale(String locale)
-    {
-        this.locale = locale;
-
+        resolve(key, obj.toString());
         return this;
     }
 
@@ -147,13 +132,29 @@ public class FormattableMessage implements Comparable<FormattableMessage>
      * @param store MessageStore
      * @return 可以显示的Component
      */
-    public Component toComponent(@Nullable String locale, MessageStore<?> store)
+    public Component createComponent(@Nullable String preferredLocale, MessageStore<?> store)
     {
         if (store == null) return Component.text(defaultString);
 
-        if (locale == null) locale = this.locale;
+        String locale = null;
+
+        if (!this.priorityLocale.isBlank())
+        {
+            locale = this.priorityLocale;
+        }
+        else
+        {
+            locale = (preferredLocale == null || preferredLocale.isBlank())
+                    ? "en_us"
+                    : preferredLocale;
+        }
 
         String msg = key.equals("_") ? defaultString : store.get(key, defaultString, locale);
+
+        @Nullable String finalLocale = locale;
+        var resolvers = this.resolvers.entrySet().stream()
+                .map(entry -> Placeholder.component(entry.getKey(), entry.getValue().resolve(finalLocale)))
+                .toList();
 
         return MiniMessage.miniMessage().deserialize(msg, TagResolver.resolver(resolvers));
     }
@@ -163,49 +164,45 @@ public class FormattableMessage implements Comparable<FormattableMessage>
      * @param depClass 继承MessageStore的对象的Class
      * @return 可以显示的Component
      */
-    public Component toComponent(@Nullable String locale, Class<? extends MessageStore<?>> depClass)
+    public Component createComponent(@Nullable String preferredLocale, Class<? extends MessageStore<?>> depClass)
     {
-        return toComponent(locale, depManager.get(depClass));
+        return createComponent(preferredLocale, depManager.get(depClass));
     }
 
     /**
      * 尝试自动转换为Component
      * @return 可以显示的Component
      */
-    public Component toComponent(@Nullable String locale)
+    public Component createComponent(@Nullable String preferredLocale)
     {
-        return toComponent(locale, getCachedStore());
+        return createComponent(preferredLocale, getCachedStore());
     }
 
     /**
      * 尝试自动转换为Component
      * @return 可以显示的Component
      */
-    public Component toComponent()
+    public Component createComponent()
     {
-        return toComponent(null, getCachedStore());
+        return createComponent(null, getCachedStore());
     }
 
     private static final PlainTextComponentSerializer plainTextComponentSerializer = PlainTextComponentSerializer.plainText();
 
+    public String createString(@Nullable String preferredLocale)
+    {
+        return plainTextComponentSerializer.serialize(createComponent(preferredLocale));
+    }
+
+    public String createString()
+    {
+        return createString(null);
+    }
+
+    @Override
     public String toString()
     {
-        return plainTextComponentSerializer.serialize(toComponent());
-    }
-
-    public String toString(@Nullable String locale)
-    {
-        return plainTextComponentSerializer.serialize(toComponent(locale));
-    }
-
-    public String toString(@Nullable String locale, Class<? extends MessageStore<?>> depClass)
-    {
-        return plainTextComponentSerializer.serialize(toComponent(locale, depClass));
-    }
-
-    public String toString(@Nullable String locale, MessageStore<?> store)
-    {
-        return plainTextComponentSerializer.serialize(toComponent(locale, store));
+        return "FormattableMessage[key=%s, defaultString=%s]".formatted(this.key, this.defaultString);
     }
 
     @Override

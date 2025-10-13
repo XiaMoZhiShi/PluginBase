@@ -48,7 +48,7 @@ public abstract class MessageStore<T extends XiaMoJavaPlugin> extends JsonBasedS
     @Override
     protected @NotNull String getDisplayName()
     {
-        return "消息存储";
+        return "MessageStore";
     }
 
     @Override
