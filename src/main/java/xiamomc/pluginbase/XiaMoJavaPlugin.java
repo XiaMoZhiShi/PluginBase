@@ -1,12 +1,14 @@
 package xiamomc.pluginbase;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.Utilities.PluginSoftDependManager;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -209,18 +211,13 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
     {
         if (exception == null) return;
 
-        int exceptions;
-        synchronized (exceptionCaught)
-        {
-            exceptions = exceptionCaught.incrementAndGet();
-        }
+        int exceptions = exceptionCaught.incrementAndGet();
 
-        logger.warn("执行" + scheduleInfo + "时捕获到未处理的异常：");
-        exception.printStackTrace();
+        logger.warn("Uncaught exception when processing " + scheduleInfo, exception);
 
         if (exceptions >= getExceptionLimit())
         {
-            logger.error("可接受异常已到达最大限制: " + exceptionCaught + " -> " + getExceptionLimit());
+            logger.error("Exceptions reached the limit! Trying to shut down plugin...");
 
             this.schedules.clear();
             Bukkit.getPluginManager().disablePlugin(this);
@@ -238,7 +235,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
 
     //endregion tick相关
 
-    protected final List<ScheduleInfo> schedules = new ObjectArrayList<>();
+    protected final List<ScheduleInfo> schedules = Collections.synchronizedList(new ObjectArrayList<>());
 
     @Deprecated
     public ScheduleInfo schedule(Consumer<?> consumer)

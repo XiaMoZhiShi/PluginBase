@@ -2,7 +2,7 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
-io-papermc-paper-paper-api = "1.21.1-R0.1-SNAPSHOT"
+io-papermc-paper-paper-api = "1.21.10-R0.1-SNAPSHOT"
 org-apache-commons-commons-lang3 = "3.12.0"
 
 [libraries]
