@@ -2,15 +2,23 @@ package xiamomc.pluginbase.Configuration;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ConfigOption<T>
 {
     private final ConfigNode node;
-    private final Function<Object, T> defaultValueFunc;
+    private final T defaultValue;
     private final List<String> flags = new ObjectArrayList<>();
+    private final Class<T> type;
+
+    public Class<T> type()
+    {
+        return type;
+    }
 
     public ConfigNode node()
     {
@@ -20,22 +28,14 @@ public class ConfigOption<T>
     @NotNull
     public T getDefault()
     {
-        return defaultValueFunc.apply(null);
+        return defaultValue;
     }
 
-    public ConfigOption(ConfigNode node, T defaultValue)
-    {
-        this(node, (o) -> defaultValue);
-    }
-
-    /**
-     * @param node The binding ConfigNode
-     * @param defaultValueFunc A function that returns the default value, the input to this function will always be null
-     */
-    public ConfigOption(ConfigNode node, Function<Object, T> defaultValueFunc)
+    public ConfigOption(ConfigNode node, Class<T> type, T defaultValue)
     {
         this.node = node;
-        this.defaultValueFunc = defaultValueFunc;
+        this.type = type;
+        this.defaultValue = defaultValue;
     }
 
     public ConfigOption<T> withFlag(String flag)
@@ -71,4 +71,66 @@ public class ConfigOption<T>
     }
 
     //endregion
+
+    public static <X> ConfigOptionBuilder<X> builder()
+    {
+        return new ConfigOptionBuilder<>();
+    }
+
+    public static <X> ConfigOptionBuilder<X> builder(Class<X> type)
+    {
+        return new ConfigOptionBuilder<X>().type(type);
+    }
+
+    public static class ConfigOptionBuilder<T>
+    {
+        private ConfigNode node;
+
+        private boolean typeAssigned;
+
+        @Nullable
+        private Class<T> type;
+
+        private T defaultValue;
+
+        private boolean excludeFromInit;
+
+        public ConfigOptionBuilder<T> node(ConfigNode node)
+        {
+            this.node = node;
+            return this;
+        }
+
+        public ConfigOptionBuilder<T> defaultValue(T defaultValue)
+        {
+            if (!typeAssigned)
+                type = (Class<T>) defaultValue.getClass();
+
+            this.defaultValue = defaultValue;
+            return this;
+        }
+
+        public ConfigOptionBuilder<T> type(Class<T> type)
+        {
+            this.typeAssigned = true;
+            this.type = type;
+            return this;
+        }
+
+        public ConfigOptionBuilder<T> excludeFromInit(boolean excludeFromInit)
+        {
+            this.excludeFromInit = excludeFromInit;
+            return this;
+        }
+
+        public ConfigOption<T> build()
+        {
+            ConfigOption<T> option = new ConfigOption<>(node, type, defaultValue);
+
+            if (excludeFromInit)
+                option.setExcludeFromInit();
+
+            return option;
+        }
+    }
 }

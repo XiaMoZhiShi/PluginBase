@@ -104,14 +104,7 @@ public class PluginConfigManager implements IConfigManager
     public <T> T getOrDefault(ConfigOption<T> option, @Nullable T defaultValue)
     {
         var val = get(option);
-
-        if (val == null)
-        {
-            set(option, defaultValue);
-            return defaultValue;
-        }
-
-        return val;
+        return val == null ? defaultValue : val;
     }
 
     @NotNull
@@ -206,6 +199,12 @@ public class PluginConfigManager implements IConfigManager
         var bb = this.getBindable(type, node);
 
         bindable.bindTo(bb);
+    }
+
+    public <T> void bind(Class<T> elementClass, BindableList<T> bindable, ConfigOption<List<T>> option)
+    {
+        var list = this.getBindableList(elementClass, option);
+        bindable.bindTo(list);
     }
 
     public <T> void bind(Bindable<T> bindable, ConfigOption<T> option)

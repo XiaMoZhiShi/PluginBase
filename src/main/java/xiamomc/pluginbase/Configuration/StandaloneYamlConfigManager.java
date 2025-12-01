@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.PluginObject;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
+import xyz.nifeather.morph.config.ConfigOptions;
 
 import java.io.File;
 import java.util.Collection;
@@ -22,7 +23,10 @@ public abstract class StandaloneYamlConfigManager<P extends XiaMoJavaPlugin> ext
     @Nullable
     private final String internalResourceName;
 
-    public static final ConfigOption<Integer> CONFIG_VERSION = new ConfigOption<>(ConfigNode.create().append("version"), 0);
+    public static final ConfigOption<Integer> CONFIG_VERSION = ConfigOption.<Integer>builder()
+            .node(ConfigNode.create().append("version1"))
+            .defaultValue(0)
+            .build();
 
     public StandaloneYamlConfigManager(@NotNull File file, @Nullable String internalResourceName)
     {
