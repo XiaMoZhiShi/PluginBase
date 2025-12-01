@@ -18,52 +18,7 @@ import java.util.function.Consumer;
 
 public class PluginSoftDependManager implements Listener
 {
-    //region 实例相关
-    private final static Map<String, PluginSoftDependManager> instances = new ConcurrentHashMap<>();
-
-    public static PluginSoftDependManager getInstance(String namespace)
-    {
-        return instances.get(namespace);
-    }
-
-    /**
-     * 获取或创建某个插件的依赖管理器
-     * @param pluginInstance 插件实例
-     * @return 此插件的依赖管理器
-     */
-    @Contract("null -> null; !null -> !null")
-    @Nullable
-    public static PluginSoftDependManager getManagerOrCreate(XiaMoJavaPlugin pluginInstance)
-    {
-        if (pluginInstance == null) return null;
-
-        var depMgr = instances.get(pluginInstance.getNamespace());
-        if (depMgr != null) return depMgr;
-
-        depMgr = new PluginSoftDependManager(pluginInstance);
-
-        return depMgr;
-    }
-
-    @Deprecated
-    public PluginSoftDependManager(XiaMoJavaPlugin plugin)
-    {
-        registerPluginInstance(plugin);
-    }
-
-    public void registerPluginInstance(XiaMoJavaPlugin plugin)
-    {
-        if (instances.containsKey(plugin.getNamespace()))
-            throw new RuntimeException("已经有一个SoftDependManager的实例了");
-
-        instances.put(plugin.getNamespace(), this);
-    }
-
-    public void unRegisterPluginInstance(XiaMoJavaPlugin plugin)
-    {
-        instances.remove(plugin.getNamespace());
-    }
-    //endregion 实例相关
+    public static final PluginSoftDependManager INSTANCE = new PluginSoftDependManager();
 
     private final Map<String, Consumer<Plugin>> onEnableStrToConsumerMap = new Object2ObjectOpenHashMap<>();
     private final Map<String, Consumer<Plugin>> onDisableStrToConsumerMap = new Object2ObjectOpenHashMap<>();

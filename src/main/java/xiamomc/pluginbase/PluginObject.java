@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
-import xiamomc.pluginbase.Managers.DependencyManager;
+import xiamomc.pluginbase.Managers.DependencyContainer;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -22,7 +22,7 @@ public abstract class PluginObject<P extends XiaMoJavaPlugin>
 {
     protected final XiaMoJavaPlugin plugin = P.getInstance(getPluginNamespace());
 
-    protected final DependencyManager dependencies = DependencyManager.getInstance(getPluginNamespace());
+    protected final DependencyContainer dependencies = DependencyContainer.GLOBAL;
 
     protected final Logger logger = plugin.getSLF4JLogger();
 

@@ -82,7 +82,7 @@ public abstract class MessageStore<T extends XiaMoJavaPlugin> extends JsonBasedS
 
                     //如果存储里没有此键，添加进去
                     if (!storingObject.containsKey(key))
-                        storingObject.put(key, formattable.getDefaultString());
+                        storingObject.put(key, formattable.getFallbackString());
 
                     //同步到文件
                     saveConfiguration();

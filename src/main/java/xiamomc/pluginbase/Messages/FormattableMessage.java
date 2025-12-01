@@ -7,8 +7,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.pluginbase.Managers.DependencyManager;
-import xiamomc.pluginbase.XiaMoJavaPlugin;
+import xiamomc.pluginbase.Managers.DependencyContainer;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,26 +16,21 @@ public class FormattableMessage implements Comparable<FormattableMessage>
 {
     private final String key;
 
-    private final String defaultString;
+    private final String fallbackString;
 
-    private final DependencyManager depManager;
+    private final DependencyContainer depManager = DependencyContainer.GLOBAL;
 
-    public FormattableMessage(@NotNull String pluginNameSpace, @NotNull String key, @NotNull String defaultString)
+    public static final String KEY_NO_RESOLVE = "_";
+
+    public FormattableMessage(@NotNull String key, @NotNull String fallbackString)
     {
-        this.defaultString = defaultString;
+        this.fallbackString = fallbackString;
         this.key = key;
-
-        depManager = DependencyManager.getInstance(pluginNameSpace);
     }
 
-    public FormattableMessage(@NotNull XiaMoJavaPlugin owningPlugin, @NotNull String key, @NotNull String defaultString)
+    public FormattableMessage(String value)
     {
-        this(owningPlugin.getNamespace(), key, defaultString);
-    }
-
-    public FormattableMessage(@NotNull XiaMoJavaPlugin owningPlugin, String value)
-    {
-        this(owningPlugin.getNamespace(), "_", value);
+        this(KEY_NO_RESOLVE, value);
     }
 
     /**
@@ -52,9 +46,9 @@ public class FormattableMessage implements Comparable<FormattableMessage>
      * 获取消息的默认消息
      * @return 默认消息
      */
-    public String getDefaultString()
+    public String getFallbackString()
     {
-        return defaultString;
+        return fallbackString;
     }
 
     @NotNull
@@ -134,7 +128,7 @@ public class FormattableMessage implements Comparable<FormattableMessage>
      */
     public Component createComponent(@Nullable String preferredLocale, MessageStore<?> store)
     {
-        if (store == null) return Component.text(defaultString);
+        if (store == null) return Component.text(fallbackString);
 
         String locale = null;
 
@@ -149,7 +143,9 @@ public class FormattableMessage implements Comparable<FormattableMessage>
                     : preferredLocale;
         }
 
-        String msg = key.equals("_") ? defaultString : store.get(key, defaultString, locale);
+        String msg = key.equals(KEY_NO_RESOLVE)
+                     ? fallbackString
+                     : store.get(key, fallbackString, locale);
 
         @Nullable String finalLocale = locale;
         var resolvers = this.resolvers.entrySet().stream()
@@ -202,12 +198,22 @@ public class FormattableMessage implements Comparable<FormattableMessage>
     @Override
     public String toString()
     {
-        return "FormattableMessage[key=%s, defaultString=%s]".formatted(this.key, this.defaultString);
+        return "FormattableMessage[key=%s, fallbackString=%s]".formatted(this.key, this.fallbackString);
     }
 
     @Override
     public int compareTo(@NotNull FormattableMessage formattableMessage)
     {
         return this.key.compareTo(formattableMessage.key);
+    }
+
+    public static FormattableMessage translatable(String key, String fallback)
+    {
+        return new FormattableMessage(key, fallback);
+    }
+
+    public static FormattableMessage literal(String message)
+    {
+        return new FormattableMessage(message);
     }
 }

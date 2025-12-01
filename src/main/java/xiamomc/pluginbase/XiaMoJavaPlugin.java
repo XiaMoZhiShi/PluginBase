@@ -1,11 +1,10 @@
 package xiamomc.pluginbase;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
-import xiamomc.pluginbase.Managers.DependencyManager;
+import xiamomc.pluginbase.Managers.DependencyContainer;
 import xiamomc.pluginbase.Utilities.PluginSoftDependManager;
 
 import java.util.Collections;
@@ -32,7 +31,11 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
 
     public abstract String getNamespace();
 
-    protected final DependencyManager dependencyManager;
+    protected final DependencyContainer dependencyContainer;
+    public DependencyContainer dependencyContainer()
+    {
+        return dependencyContainer;
+    }
 
     protected final PluginSoftDependManager softDeps;
 
@@ -40,8 +43,8 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
 
     public XiaMoJavaPlugin()
     {
-        dependencyManager = DependencyManager.getManagerOrCreate(this);
-        softDeps = PluginSoftDependManager.getManagerOrCreate(this);
+        dependencyContainer = DependencyContainer.GLOBAL;
+        softDeps = PluginSoftDependManager.INSTANCE;
 
         instances.put(getNamespace(), this);
     }
@@ -55,18 +58,14 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
     {
         super.onEnable();
 
-        //region 注册依赖
-        dependencyManager.unRegisterPluginInstance(this);
-        dependencyManager.registerPluginInstance(this);
-
         softDeps.clearHandles();
 
         //先反注册一遍所有依赖再注册插件
-        dependencyManager.unCacheAll();
+        dependencyContainer.unCacheAll();
 
         processExceptionCount();
 
-        dependencyManager.cacheAs(XiaMoJavaPlugin.class, this);
+        dependencyContainer.cacheAs(XiaMoJavaPlugin.class, this);
 
         //endregion
 
@@ -95,9 +94,7 @@ public abstract class XiaMoJavaPlugin extends JavaPlugin implements ISchedulable
         this.acceptSchedules = false;
 
         //反注册依赖
-        dependencyManager.unCacheAll();
-        dependencyManager.unRegisterPluginInstance(this);
-        softDeps.unRegisterPluginInstance(this);
+        dependencyContainer.unCacheAll();
     }
 
     public boolean doInternalDebugOutput = false;
