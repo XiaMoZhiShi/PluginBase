@@ -28,7 +28,7 @@ dependencies {
 }
 
 group = "com.github.XiaMoZhiShi"
-version = "2024.916.0"
+version = "2025.1201.0"
 description = "Pluginbase"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
