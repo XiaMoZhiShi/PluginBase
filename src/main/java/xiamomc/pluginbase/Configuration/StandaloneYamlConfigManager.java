@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.PluginObject;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
-import xyz.nifeather.morph.config.ConfigOptions;
 
 import java.io.File;
 import java.util.Collection;
