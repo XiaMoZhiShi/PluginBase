@@ -25,8 +25,6 @@ public class PluginConfigManager implements IConfigManager
     {
         this.plugin = plugin;
         plugin.saveDefaultConfig();
-
-        this.reload();
     }
 
     //region get and get bindable methods
@@ -320,8 +318,7 @@ public class PluginConfigManager implements IConfigManager
             }
             catch (Throwable t)
             {
-                logger.warn("[PluginBase] Unable to set value for Bindable bind to config node %s: %s".formatted(str, t.getMessage()));
-                t.printStackTrace();
+                logger.warn("[PluginBase] Unable to set value for Bindable bind to config node %s".formatted(str), t);
             }
         });
 
@@ -347,8 +344,7 @@ public class PluginConfigManager implements IConfigManager
             }
             catch (Throwable t)
             {
-                logger.warn("Exception thrown while calling one of the onRefresh hooks: " + t.getMessage());
-                t.printStackTrace();
+                logger.warn("Exception thrown while calling one of the onRefresh hooks", t);
             }
         }
 
